@@ -1,0 +1,1446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Social House — Bole, Addis Ababa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          cream: '#FAF8F5',
+          cream2: '#F2EEE6',
+          cream3: '#ECE6DA',
+          espresso: '#1D1D1F',
+          espresso2: '#4A4744',
+          brass: '#A67C52',
+          brassDeep: '#8B6740',
+          sage: '#5C6B57',
+          line: 'rgba(29,29,31,0.10)',
+        },
+        fontFamily: {
+          sans: ['Inter', 'ui-sans-serif', 'system-ui'],
+          mono: ['"IBM Plex Mono"', 'ui-monospace', 'monospace'],
+        },
+        borderRadius: {
+          '4xl': '2rem',
+          '5xl': '2.5rem',
+        }
+      }
+    }
+  }
+</script>
+<style>
+  :root { color-scheme: light; }
+  * { -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; }
+  body { background: #FAF8F5; font-feature-settings: "ss01","cv01"; }
+  ::selection { background: #A67C52; color: #FAF8F5; }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(29,29,31,0.18); border-radius: 999px; }
+
+  a, button { -webkit-tap-highlight-color: transparent; }
+  :focus-visible { outline: 2px solid #A67C52; outline-offset: 3px; border-radius: 4px; }
+
+  input[type="date"]{ font-family: inherit; }
+  input[type="date"]::-webkit-calendar-picker-indicator{ opacity: 0.45; cursor: pointer; }
+
+  @keyframes fadeInUp { from { opacity: 0; transform: translateY(18px);} to { opacity: 1; transform: translateY(0);} }
+  .reveal { opacity: 0; }
+  .reveal.in { animation: fadeInUp 0.7s cubic-bezier(.16,.8,.24,1) forwards; }
+
+  @keyframes flicker { 0%,100% { opacity: 0.85; } 50% { opacity: 0.4; } }
+  .facade-flicker { animation: flicker 5s ease-in-out infinite; }
+
+  @keyframes softDrift { 0% { transform: translate3d(0,0,0); } 50% { transform: translate3d(0,-6px,0); } 100% { transform: translate3d(0,0,0); } }
+  .drift { animation: softDrift 7s ease-in-out infinite; }
+
+  @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  .marquee-track { animation: marquee 26s linear infinite; }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .facade-flicker, .drift, .marquee-track { animation: none !important; }
+    .reveal { opacity: 1 !important; animation: none !important; transform: none !important; }
+  }
+
+  .glass { background: rgba(255,255,255,0.6); backdrop-filter: blur(18px) saturate(160%); -webkit-backdrop-filter: blur(18px) saturate(160%); }
+  .glass-dark { background: rgba(29,29,31,0.72); backdrop-filter: blur(18px) saturate(140%); -webkit-backdrop-filter: blur(18px) saturate(140%); }
+
+  .tap { transition: transform 0.35s cubic-bezier(.16,.8,.24,1), opacity 0.35s; }
+  .tap:active { transform: scale(0.97); }
+</style>
+</head>
+<body class="bg-cream text-espresso antialiased font-sans">
+<div id="root"></div>
+
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useRef, useMemo, useCallback, createContext, useContext } = React;
+
+/* ============================== ICONS ============================== */
+const IconWrap = ({ children, size = 20, className = "", strokeWidth = 1.6 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+    strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" className={className}>
+    {children}
+  </svg>
+);
+const MenuIcon = (p) => <IconWrap {...p}><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></IconWrap>;
+const XIcon = (p) => <IconWrap {...p}><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></IconWrap>;
+const ChevronRight = (p) => <IconWrap {...p}><polyline points="9 6 15 12 9 18"/></IconWrap>;
+const ChevronLeft = (p) => <IconWrap {...p}><polyline points="15 6 9 12 15 18"/></IconWrap>;
+const ChevronDown = (p) => <IconWrap {...p}><polyline points="6 9 12 15 18 9"/></IconWrap>;
+const ArrowRight = (p) => <IconWrap {...p}><line x1="4" y1="12" x2="20" y2="12"/><polyline points="13 5 20 12 13 19"/></IconWrap>;
+const CalendarIcon = (p) => <IconWrap {...p}><rect x="3" y="5" width="18" height="16" rx="3"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/></IconWrap>;
+const UsersIcon = (p) => <IconWrap {...p}><circle cx="9" cy="8.5" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17.5" cy="9.5" r="2.4"/><path d="M15.5 14a5 5 0 0 1 5.5 5"/></IconWrap>;
+const SearchIcon = (p) => <IconWrap {...p}><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.2" y2="16.2"/></IconWrap>;
+const CheckIcon = (p) => <IconWrap {...p}><polyline points="20 6 9 17 4 12"/></IconWrap>;
+const PlusIcon = (p) => <IconWrap {...p}><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></IconWrap>;
+const MinusIcon = (p) => <IconWrap {...p}><line x1="5" y1="12" x2="19" y2="12"/></IconWrap>;
+const BedIcon = (p) => <IconWrap {...p}><path d="M3 18v-6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6"/><path d="M3 18v2"/><path d="M21 18v2"/><path d="M3 12V7a1 1 0 0 1 1-1h5a1 1 0 0 1 1 1v3"/><path d="M13 10h6"/></IconWrap>;
+const MaximizeIcon = (p) => <IconWrap {...p}><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></IconWrap>;
+const MapPinIcon = (p) => <IconWrap {...p}><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="2.6"/></IconWrap>;
+const ClockIcon = (p) => <IconWrap {...p}><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 16 14"/></IconWrap>;
+const PhoneIcon = (p) => <IconWrap {...p}><path d="M4 5c0-.6.4-1 1-1h3l2 5-2 1.4a11 11 0 0 0 5 5L14.6 14l5 2v3c0 .6-.4 1-1 1C10.5 20 4 13.5 4 5Z"/></IconWrap>;
+const MailIcon = (p) => <IconWrap {...p}><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 6 8 6 8-6"/></IconWrap>;
+const InstagramIcon = (p) => <IconWrap {...p}><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="0.6" fill="currentColor" stroke="none"/></IconWrap>;
+const CoffeeIcon = (p) => <IconWrap {...p}><path d="M4 9h13v6a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4V9Z"/><path d="M17 10h1.5a2.5 2.5 0 0 1 0 5H17"/><path d="M8 5.5c0-1 1-1 1-2M12 5.5c0-1 1-1 1-2"/></IconWrap>;
+const WineIcon = (p) => <IconWrap {...p}><path d="M8 3h8l-1 8a3 3 0 0 1-6 0L8 3Z"/><path d="M12 14v7"/><path d="M8.5 21h7"/></IconWrap>;
+const LaptopIcon = (p) => <IconWrap {...p}><rect x="4" y="4" width="16" height="11" rx="1.5"/><path d="M2 19h20"/><path d="M8 19l1-2h6l1 2"/></IconWrap>;
+const SunIcon = (p) => <IconWrap {...p}><circle cx="12" cy="12" r="4.2"/><line x1="12" y1="2.5" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="21.5"/><line x1="2.5" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="21.5" y2="12"/><line x1="5" y1="5" x2="6.8" y2="6.8"/><line x1="17.2" y1="17.2" x2="19" y2="19"/><line x1="19" y1="5" x2="17.2" y2="6.8"/><line x1="6.8" y1="17.2" x2="5" y2="19"/></IconWrap>;
+const SunsetIcon = (p) => <IconWrap {...p}><path d="M17 18a5 5 0 0 0-10 0"/><line x1="12" y1="9" x2="12" y2="2"/><polyline points="9 5 12 2 15 5"/><line x1="1" y1="18" x2="23" y2="18"/><line x1="1" y1="22" x2="23" y2="22"/><line x1="4" y1="14" x2="6" y2="16"/><line x1="20" y1="14" x2="18" y2="16"/></IconWrap>;
+const MoonIcon = (p) => <IconWrap {...p}><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5Z"/></IconWrap>;
+const StarIcon = (p) => <IconWrap {...p}><polygon points="12 2.5 15 9 22 10 17 15 18.2 21.5 12 18.3 5.8 21.5 7 15 2 10 9 9"/></IconWrap>;
+const WifiIcon = (p) => <IconWrap {...p}><path d="M2 8.5a16 16 0 0 1 20 0"/><path d="M5.5 12.5a11 11 0 0 1 13 0"/><path d="M9 16.3a5.6 5.6 0 0 1 6 0"/><circle cx="12" cy="19.5" r="1" fill="currentColor" stroke="none"/></IconWrap>;
+const ShieldIcon = (p) => <IconWrap {...p}><path d="M12 3l7 3v6c0 4.8-3 8-7 9-4-1-7-4.2-7-9V6l7-3Z"/><polyline points="9 12 11.2 14 15.5 9.5"/></IconWrap>;
+const CreditCardIcon = (p) => <IconWrap {...p}><rect x="2.5" y="5.5" width="19" height="13" rx="2.2"/><line x1="2.5" y1="10" x2="21.5" y2="10"/><line x1="6" y1="14.5" x2="10" y2="14.5"/></IconWrap>;
+const KeyIcon = (p) => <IconWrap {...p}><circle cx="8" cy="15" r="4.2"/><path d="M11 12l8-8"/><path d="M16 7l2.5 2.5"/><path d="M13.3 9.7l2 2"/></IconWrap>;
+const SlidersIcon = (p) => <IconWrap {...p}><line x1="5" y1="4" x2="5" y2="14"/><circle cx="5" cy="16.5" r="2"/><line x1="12" y1="4" x2="12" y2="8"/><circle cx="12" cy="10.5" r="2"/><line x1="12" y1="13" x2="12" y2="20"/><line x1="19" y1="4" x2="19" y2="10"/><circle cx="19" cy="12.5" r="2"/><line x1="19" y1="15" x2="19" y2="20"/></IconWrap>;
+const ChatIcon = (p) => <IconWrap {...p}><path d="M21 12a8 8 0 0 1-11.8 7L3 20l1.2-5A8 8 0 1 1 21 12Z"/></IconWrap>;
+const ReceiptIcon = (p) => <IconWrap {...p}><path d="M6 3h12v18l-2.5-1.5L13 21l-2.5-1.5L8 21l-2-1.5L6 3Z"/><line x1="8.5" y1="8" x2="15.5" y2="8"/><line x1="8.5" y1="12" x2="15.5" y2="12"/></IconWrap>;
+const Building2Icon = (p) => <IconWrap {...p}><rect x="4" y="3" width="10" height="18"/><rect x="14" y="9" width="6" height="12"/><line x1="7" y1="7" x2="7" y2="7.01"/><line x1="11" y1="7" x2="11" y2="7.01"/><line x1="7" y1="11" x2="7" y2="11.01"/><line x1="11" y1="11" x2="11" y2="11.01"/><line x1="7" y1="15" x2="7" y2="15.01"/><line x1="11" y1="15" x2="11" y2="15.01"/></IconWrap>;
+const LeafIcon = (p) => <IconWrap {...p}><path d="M4 20c8 0 16-6 16-16C10 4 4 12 4 20Z"/><path d="M4 20c3-5 6-8 12-12"/></IconWrap>;
+const TicketIcon = (p) => <IconWrap {...p}><path d="M3 9a2 2 0 0 0 0 6v2a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-2a2 2 0 0 1 0-6V7a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v2Z"/><line x1="10" y1="6" x2="10" y2="18" strokeDasharray="2.5 2.5"/></IconWrap>;
+
+/* ============================== DATA ============================== */
+const NAV_LINKS = [
+  { label: "Rooms & Suites", href: "#/rooms" },
+  { label: "Dining & Spaces", href: "#/dining" },
+  { label: "Experience", href: "#/experience" },
+  { label: "Contact", href: "#/contact" },
+];
+
+const ROOMS = [
+  {
+    id: "studio",
+    name: "Studio Room",
+    category: "Rooms",
+    sqm: 32,
+    guests: 2,
+    price: 180,
+    view: "Courtyard view",
+    blurb: "A tight, well-made box for the essentials — good light, a proper desk, and nothing you don't need.",
+    features: ["Queen bed", "Rain shower", "Workdesk", "Air conditioning"],
+    litRatio: 0.3,
+  },
+  {
+    id: "corner",
+    name: "Corner Suite",
+    category: "Suites",
+    sqm: 48,
+    guests: 2,
+    price: 260,
+    view: "Bole skyline view",
+    blurb: "Two walls of glass and a separate sitting area, for guests who work from where they sleep.",
+    features: ["King bed", "Sitting area", "Soaking tub", "Espresso bar"],
+    litRatio: 0.45,
+  },
+  {
+    id: "loft",
+    name: "Loft Suite",
+    category: "Suites",
+    sqm: 65,
+    guests: 3,
+    price: 340,
+    view: "Double-height, garden view",
+    blurb: "A mezzanine sleeping level over an open living floor. Built for a longer stay.",
+    features: ["Mezzanine bed", "Full kitchenette", "Private balcony", "Record player"],
+    litRatio: 0.55,
+  },
+  {
+    id: "penthouse",
+    name: "The Penthouse",
+    category: "Penthouses",
+    sqm: 110,
+    guests: 4,
+    price: 620,
+    view: "Panoramic city + Entoto Hills view",
+    blurb: "The top floor, on its own landing. A private terrace, a second bedroom, and a standing dinner table for six.",
+    features: ["Two bedrooms", "Private terrace", "Dining for 6", "Dedicated host"],
+    litRatio: 0.7,
+  },
+];
+
+const ROOM_FILTERS = ["All Rooms", "Suites", "Penthouses"];
+
+const DINING = [
+  {
+    id: "mesob",
+    name: "Mesob",
+    kicker: "All-Day Restaurant",
+    icon: CoffeeIcon,
+    blurb: "Breakfast through dinner, built around a wood-fired oven and a produce list that changes with what came into Merkato that morning. Half the menu is Ethiopian, half is not — the kitchen doesn't see a reason to pick.",
+    hours: [["Breakfast", "6:30 – 10:30"], ["Lunch", "12:00 – 15:30"], ["Dinner", "18:30 – 22:30"]],
+    menu: [
+      ["Shakshuka, injera crumb", "$9"],
+      ["Kitfo, mustard butter", "$16"],
+      ["Wood-fired sea bass, berbere oil", "$24"],
+      ["Charred cabbage, awaze glaze", "$8"],
+    ],
+  },
+  {
+    id: "roof",
+    name: "The Roof",
+    kicker: "Rooftop Bar",
+    icon: WineIcon,
+    blurb: "Nine floors up, facing west for the sunset and the Entoto ridgeline behind it. Snacks after four, a short cocktail list built around Ethiopian gin and coffee liqueur, and a DJ on Friday and Saturday from ten.",
+    hours: [["Daily", "16:00 – 01:00"], ["DJ nights", "Fri – Sat, from 22:00"]],
+    menu: [
+      ["Tej sour", "$11"],
+      ["Smoked coffee negroni", "$13"],
+      ["Grilled corn, lime, mitmita", "$6"],
+      ["Ambo & tonic", "$5"],
+    ],
+  },
+  {
+    id: "desk",
+    name: "The Desk",
+    kicker: "Social & Co-Working Lounge",
+    icon: LaptopIcon,
+    blurb: "A ground-floor room for people who'd rather not work from bed — long tables, fast wifi, and a coffee bar staffed from seven. Day passes for non-guests, standing meeting rooms behind the shelving.",
+    hours: [["Daily", "7:00 – 22:00"], ["Meeting rooms", "By the hour, front desk"]],
+    menu: [
+      ["Day pass", "$18"],
+      ["Meeting room (1hr)", "$25"],
+      ["Filter coffee, refills included", "$4"],
+      ["Printing & scanning", "At cost"],
+    ],
+  },
+];
+
+const NEIGHBORHOOD = [
+  { id: "unity-park", name: "Unity Park", category: "Parks & Green Space", icon: LeafIcon, walk: "14 min walk", blurb: "Palace grounds turned public gardens — the closest thing the city has to a formal park, with a small zoo and a cable-car view point." },
+  { id: "friendship-park", name: "Friendship Park", category: "Parks & Green Space", icon: LeafIcon, walk: "9 min walk", blurb: "River-front paths and fountains along the Kebena — quiet in the morning, full of families by early evening." },
+  { id: "yared-roasters", name: "Yared Coffee Roasters", category: "Coffee & Roasters", icon: CoffeeIcon, walk: "4 min walk", blurb: "Single-origin Yirgacheffe and Guji lots, roasted on-site in small batches. Ask for the cupping notes chalked up by the till." },
+  { id: "kuriftu-gallery", name: "Kuriftu Contemporary", category: "Culture & Art", icon: TicketIcon, walk: "11 min walk", blurb: "A converted warehouse showing Ethiopian and East African contemporary artists, with a rotating show roughly every six weeks." },
+  { id: "edna-cinema", name: "Edna Mall Cinema", category: "Culture & Art", icon: TicketIcon, walk: "16 min walk", blurb: "The city's most reliable first-run screens, with a late show most nights that suits jet lag better than a hotel room does." },
+  { id: "shola-market", name: "Shola Market", category: "Markets & Shopping", icon: Building2Icon, walk: "7 min walk", blurb: "Produce, spice, and textile stalls a fraction of Merkato's size — easier to navigate for a first visit, and just as good for berbere." },
+  { id: "bole-craft", name: "Bole Craft Row", category: "Markets & Shopping", icon: Building2Icon, walk: "6 min walk", blurb: "A short street of leatherwork, silver, and basket weavers. Prices are fair; bargaining is still expected and enjoyed." },
+  { id: "entoto-lookout", name: "Entoto Hills Lookout", category: "Parks & Green Space", icon: MapPinIcon, walk: "20 min drive", blurb: "Eucalyptus forest and the best full view of Addis there is. We arrange a driver for sunrise — worth the early alarm." },
+];
+
+const NEIGHBORHOOD_CATEGORIES = ["All", "Coffee & Roasters", "Culture & Art", "Parks & Green Space", "Markets & Shopping"];
+
+const ADDONS = [
+  { id: "breakfast", name: "Breakfast at Mesob", desc: "Daily, for the length of your stay", price: 14, unit: "/ night" },
+  { id: "transfer", name: "Airport Transfer", desc: "Private car, both ways, Bole International", price: 35, unit: "/ trip" },
+  { id: "late-checkout", name: "Late Checkout", desc: "Keep the room until 4pm, subject to availability", price: 25, unit: "flat" },
+  { id: "rooftop-dinner", name: "Rooftop Dinner for Two", desc: "Set menu at The Roof, one seating", price: 68, unit: "flat" },
+];
+
+const STORY_TABS = [
+  {
+    id: "key",
+    label: "Digital Key",
+    icon: KeyIcon,
+    title: "Skip the front desk.",
+    desc: "Your room unlocks from your phone the moment your reservation is confirmed. Hold it to the door, or hand a guest key to someone joining you later — no plastic, no line.",
+    points: ["Live from booking confirmation", "Shareable with up to 3 guests", "Works offline once downloaded"],
+  },
+  {
+    id: "controls",
+    label: "Room Controls",
+    icon: SlidersIcon,
+    title: "The room, set before you arrive.",
+    desc: "Temperature, lighting scene, and curtain position are all set from the app — before you land, or from the pillow at midnight.",
+    points: ["Three lighting scenes per room", "Climate pre-set to your arrival time", "Do-not-disturb synced to the door"],
+  },
+  {
+    id: "concierge",
+    label: "Concierge Chat",
+    icon: ChatIcon,
+    title: "A message, not a phone call.",
+    desc: "Book a table at Mesob, ask for a late checkout, or get a walking route to Yared Roasters — all answered by a person, in the app, usually inside three minutes.",
+    points: ["Staffed 6:30am – midnight", "Direct line to every outlet on-site", "Requests logged to your stay, not lost"],
+  },
+  {
+    id: "checkout",
+    label: "Express Checkout",
+    icon: ReceiptIcon,
+    title: "Leave without stopping to leave.",
+    desc: "Your folio is itemized in the app in real time. Approve it the night before, and the room releases itself the next morning.",
+    points: ["Itemized in real time, no surprises", "Receipt emailed automatically", "Bags held at the desk either way"],
+  },
+];
+
+const BENTO = [
+  { id: "lounge", title: "The Lounge", desc: "Coffee by 7, cocktails by 7 — the ground floor doesn't have a bedtime.", icon: CoffeeIcon, span: "md:col-span-2 md:row-span-2", href: "#/dining" },
+  { id: "rooms", title: "Design-Driven Rooms", desc: "Every room drawn from scratch for this building, not picked from a catalogue.", icon: BedIcon, span: "md:col-span-2", href: "#/rooms" },
+  { id: "neighborhood", title: "Curated Neighborhood", desc: "A walking guide to Bole, kept current by the people at the front desk.", icon: MapPinIcon, span: "", href: "#/experience" },
+  { id: "seamless", title: "Seamless Stay", desc: "Digital key, room controls, and checkout — all from your phone.", icon: KeyIcon, span: "", href: "#/experience" },
+];
+
+/* ============================== HELPERS ============================== */
+function useHashRoute() {
+  const [hash, setHash] = useState(window.location.hash || "#/");
+  useEffect(() => {
+    const onChange = () => setHash(window.location.hash || "#/");
+    window.addEventListener("hashchange", onChange);
+    return () => window.removeEventListener("hashchange", onChange);
+  }, []);
+  return hash;
+}
+
+function navigate(href) {
+  window.location.hash = href;
+  window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
+}
+
+function Reveal({ children, className = "", delay = 0, as: Tag = "div" }) {
+  const ref = useRef(null);
+  const [inView, setInView] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach((e) => { if (e.isIntersecting) { setInView(true); obs.unobserve(el); } });
+    }, { threshold: 0.15 });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+  return (
+    <Tag ref={ref} className={`reveal ${inView ? "in" : ""} ${className}`} style={{ animationDelay: `${delay}ms` }}>
+      {children}
+    </Tag>
+  );
+}
+
+function fmtDate(d) {
+  if (!d) return "";
+  const parts = d.split("-");
+  if (parts.length !== 3) return d;
+  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  return `${parseInt(parts[2],10)} ${months[parseInt(parts[1],10)-1]} ${parts[0]}`;
+}
+function nightsBetween(a, b) {
+  if (!a || !b) return 0;
+  const d1 = new Date(a), d2 = new Date(b);
+  const diff = Math.round((d2.getTime() - d1.getTime()) / 86400000);
+  return diff > 0 ? diff : 0;
+}
+function money(n) { return `$${n.toLocaleString("en-US")}`; }
+
+/* ============================== FACADE (signature motif) ============================== */
+const FACADE_COLS = 12, FACADE_ROWS = 6;
+const FACADE_SEED = Array.from({ length: FACADE_COLS * FACADE_ROWS }, (_, i) => (i * 37 + 11) % 100);
+const MOODS = {
+  morning: { label: "Morning", icon: SunIcon, bg: "#F0ECE2", lit: "#FFF7E8", litRatio: 32, glow: "rgba(255,247,232,0.9)" },
+  golden:  { label: "Golden Hour", icon: SunsetIcon, bg: "#E9DFC9", lit: "#D9A15B", litRatio: 50, glow: "rgba(217,161,91,0.55)" },
+  night:   { label: "Night", icon: MoonIcon, bg: "#21221D", lit: "#F0C87E", litRatio: 68, glow: "rgba(240,200,126,0.45)" },
+};
+function Facade({ mood = "golden", className = "", rounded = "rounded-[28px]" }) {
+  const m = MOODS[mood];
+  return (
+    <div className={`relative overflow-hidden ${rounded} transition-colors duration-700 ${className}`} style={{ background: m.bg }}>
+      <div className="absolute inset-0 transition-opacity duration-700" style={{ boxShadow: `inset 0 0 120px 20px ${m.glow}` }} />
+      <svg viewBox={`0 0 ${FACADE_COLS * 40} ${FACADE_ROWS * 40}`} className="w-full h-full relative" preserveAspectRatio="xMidYMid slice">
+        {FACADE_SEED.map((seed, i) => {
+          const col = i % FACADE_COLS, row = Math.floor(i / FACADE_COLS);
+          const lit = seed < m.litRatio;
+          return (
+            <rect key={i} x={col * 40 + 7} y={row * 40 + 7} width="26" height="26" rx="5"
+              fill={lit ? m.lit : (mood === "night" ? "rgba(255,255,255,0.05)" : "rgba(29,29,31,0.07)")}
+              opacity={lit ? 0.92 : 1}
+              className={lit ? "facade-flicker" : ""}
+              style={lit ? { animationDelay: `${(seed % 10) * 0.35}s`, animationDuration: `${4 + (seed % 5)}s` } : {}}
+            />
+          );
+        })}
+      </svg>
+    </div>
+  );
+}
+
+/* ============================== SHARED UI ============================== */
+function Badge({ children, className = "" }) {
+  return (
+    <span className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[12.5px] font-mono tracking-wide border border-line bg-white/60 text-espresso2 ${className}`}>
+      {children}
+    </span>
+  );
+}
+
+function PrimaryButton({ children, onClick, href, className = "", size = "md", icon: Icon = ArrowRight }) {
+  const sizes = { sm: "px-4 py-2 text-[13px]", md: "px-5 py-3 text-[14.5px]", lg: "px-7 py-4 text-[15.5px]" };
+  const content = (
+    <span className={`tap inline-flex items-center justify-center gap-2 rounded-full bg-espresso text-cream font-medium hover:bg-black transition-colors duration-300 ${sizes[size]} ${className}`}>
+      {children}
+      {Icon && <Icon size={16} strokeWidth={2} />}
+    </span>
+  );
+  if (href) return <a href={href} onClick={onClick}>{content}</a>;
+  return <button onClick={onClick}>{content}</button>;
+}
+
+function SecondaryButton({ children, onClick, href, className = "", size = "md" }) {
+  const sizes = { sm: "px-4 py-2 text-[13px]", md: "px-5 py-3 text-[14.5px]" };
+  const content = (
+    <span className={`tap inline-flex items-center justify-center gap-2 rounded-full border border-espresso/20 text-espresso font-medium hover:border-espresso/50 hover:bg-espresso/[0.03] transition-all duration-300 ${sizes[size]} ${className}`}>
+      {children}
+    </span>
+  );
+  if (href) return <a href={href} onClick={onClick}>{content}</a>;
+  return <button onClick={onClick}>{content}</button>;
+}
+
+function Stepper({ value, onChange, min = 1, max = 10, label }) {
+  return (
+    <div className="flex items-center gap-3">
+      <button type="button" onClick={() => onChange(Math.max(min, value - 1))}
+        className="tap w-8 h-8 rounded-full border border-espresso/20 flex items-center justify-center hover:border-espresso/50 disabled:opacity-30"
+        disabled={value <= min} aria-label={`Decrease ${label}`}>
+        <MinusIcon size={14} />
+      </button>
+      <span className="w-6 text-center font-mono text-[14px] tabular-nums">{value}</span>
+      <button type="button" onClick={() => onChange(Math.min(max, value + 1))}
+        className="tap w-8 h-8 rounded-full border border-espresso/20 flex items-center justify-center hover:border-espresso/50 disabled:opacity-30"
+        disabled={value >= max} aria-label={`Increase ${label}`}>
+        <PlusIcon size={14} />
+      </button>
+    </div>
+  );
+}
+
+function Modal({ open, onClose, children, wide = false }) {
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => { document.removeEventListener("keydown", onKey); document.body.style.overflow = ""; };
+  }, [open, onClose]);
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-6">
+      <div className="absolute inset-0 bg-espresso/50 backdrop-blur-sm" onClick={onClose} />
+      <div className={`relative bg-cream w-full ${wide ? "sm:max-w-3xl" : "sm:max-w-lg"} max-h-[92vh] overflow-y-auto rounded-t-[28px] sm:rounded-[28px] border border-line shadow-2xl animate-[fadeInUp_0.35s_ease]`}>
+        <button onClick={onClose} className="tap absolute top-5 right-5 w-9 h-9 rounded-full bg-white/80 border border-line flex items-center justify-center hover:bg-white z-10" aria-label="Close">
+          <XIcon size={16} />
+        </button>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+/* ============================== HEADER / FOOTER ============================== */
+function Header({ route, onBook }) {
+  const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 12);
+    window.addEventListener("scroll", onScroll);
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+  return (
+    <header className={`sticky top-0 z-50 transition-all duration-500 ${scrolled ? "glass border-b border-line" : "bg-transparent"}`}>
+      <div className="max-w-[1400px] mx-auto px-5 sm:px-8 h-[72px] flex items-center justify-between">
+        <a href="#/" className="flex items-center gap-2.5 group">
+          <span className="w-8 h-8 rounded-full bg-espresso flex items-center justify-center text-cream text-[13px] font-semibold tracking-tight">SH</span>
+          <span className="text-[16.5px] font-semibold tracking-tight">Social House</span>
+        </a>
+        <nav className="hidden md:flex items-center gap-9">
+          {NAV_LINKS.map(l => (
+            <a key={l.href} href={l.href}
+              className={`text-[14px] font-medium transition-colors duration-200 ${route === l.href ? "text-espresso" : "text-espresso2 hover:text-espresso"}`}>
+              {l.label}
+            </a>
+          ))}
+        </nav>
+        <div className="hidden md:block">
+          <PrimaryButton onClick={onBook} size="sm">Book Now</PrimaryButton>
+        </div>
+        <button className="md:hidden w-10 h-10 flex items-center justify-center" onClick={() => setOpen(true)} aria-label="Open menu">
+          <MenuIcon size={22} />
+        </button>
+      </div>
+      {open && (
+        <div className="fixed inset-0 z-[110] md:hidden">
+          <div className="absolute inset-0 bg-cream flex flex-col">
+            <div className="flex items-center justify-between px-5 h-[72px] border-b border-line">
+              <span className="text-[16.5px] font-semibold">Social House</span>
+              <button onClick={() => setOpen(false)} className="w-10 h-10 flex items-center justify-center" aria-label="Close menu"><XIcon size={22} /></button>
+            </div>
+            <nav className="flex flex-col gap-1 p-5">
+              {NAV_LINKS.map(l => (
+                <a key={l.href} href={l.href} onClick={() => setOpen(false)}
+                  className="flex items-center justify-between py-4 border-b border-line text-[19px] font-medium">
+                  {l.label} <ChevronRight size={18} className="text-espresso2" />
+                </a>
+              ))}
+              <div className="mt-6"><PrimaryButton onClick={() => { setOpen(false); onBook(); }} className="w-full">Book Now</PrimaryButton></div>
+            </nav>
+          </div>
+        </div>
+      )}
+    </header>
+  );
+}
+
+function Footer() {
+  return (
+    <footer className="border-t border-line bg-cream2 mt-32">
+      <div className="max-w-[1400px] mx-auto px-5 sm:px-8 pt-16 pb-10">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-10 md:gap-8">
+          <div className="col-span-2">
+            <a href="#/" className="flex items-center gap-2.5 mb-4">
+              <span className="w-8 h-8 rounded-full bg-espresso flex items-center justify-center text-cream text-[13px] font-semibold">SH</span>
+              <span className="text-[16.5px] font-semibold tracking-tight">Social House</span>
+            </a>
+            <p className="text-[14px] text-espresso2 max-w-xs leading-relaxed">A boutique hotel and social club in Bole, Addis Ababa. Rooms upstairs, the city's living room downstairs.</p>
+            <div className="mt-6 rounded-2xl overflow-hidden h-24 max-w-xs"><Facade mood="night" rounded="rounded-2xl" /></div>
+          </div>
+          <div>
+            <div className="text-[12px] font-mono tracking-wide text-espresso2 mb-4">EXPLORE</div>
+            <ul className="space-y-3 text-[14px]">
+              {NAV_LINKS.map(l => <li key={l.href}><a href={l.href} className="hover:text-brassDeep transition-colors">{l.label}</a></li>)}
+              <li><a href="#/booking" className="hover:text-brassDeep transition-colors">Book Now</a></li>
+            </ul>
+          </div>
+          <div>
+            <div className="text-[12px] font-mono tracking-wide text-espresso2 mb-4">CONTACT</div>
+            <ul className="space-y-3 text-[14px] text-espresso2">
+              <li className="flex items-start gap-2"><MapPinIcon size={15} className="mt-0.5 shrink-0" /> Cameroon Street, Bole, Addis Ababa</li>
+              <li className="flex items-center gap-2"><PhoneIcon size={15} className="shrink-0" /> +251 911 234 567</li>
+              <li className="flex items-center gap-2"><MailIcon size={15} className="shrink-0" /> stay@socialhouse.et</li>
+            </ul>
+          </div>
+          <div>
+            <div className="text-[12px] font-mono tracking-wide text-espresso2 mb-4">STAY IN TOUCH</div>
+            <form onSubmit={(e) => e.preventDefault()} className="flex items-center gap-2">
+              <input type="email" required placeholder="Email address"
+                className="flex-1 min-w-0 px-3.5 py-2.5 rounded-full border border-line bg-white/70 text-[13px] focus:outline-none focus:border-espresso/40" />
+              <button className="tap w-10 h-10 shrink-0 rounded-full bg-espresso text-cream flex items-center justify-center"><ArrowRight size={15} /></button>
+            </form>
+            <div className="flex items-center gap-3 mt-5 text-espresso2">
+              <a href="#" className="hover:text-espresso transition-colors" aria-label="Instagram"><InstagramIcon size={19} /></a>
+            </div>
+          </div>
+        </div>
+        <div className="mt-14 pt-6 border-t border-line flex flex-col sm:flex-row gap-3 items-center justify-between text-[12.5px] text-espresso2">
+          <span>© 2026 Social House Hospitality PLC, Addis Ababa.</span>
+          <span className="font-mono">Privacy · Terms · Accessibility</span>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
+/* ============================== RESERVATION WIDGET ============================== */
+function ReservationWidget({ booking, setBooking, onSearch, className = "" }) {
+  return (
+    <div className={`glass border border-line rounded-[26px] sm:rounded-full shadow-[0_20px_60px_-20px_rgba(29,29,31,0.25)] p-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-1 ${className}`}>
+      <label className="flex-1 flex items-center gap-3 px-4 py-3 rounded-full hover:bg-white/50 transition-colors cursor-pointer">
+        <CalendarIcon size={17} className="text-espresso2 shrink-0" />
+        <span className="flex flex-col text-left w-full">
+          <span className="text-[10.5px] font-mono tracking-wide text-espresso2">CHECK-IN</span>
+          <input type="date" value={booking.checkIn}
+            onChange={(e) => setBooking(b => ({ ...b, checkIn: e.target.value }))}
+            className="bg-transparent text-[14px] font-medium focus:outline-none w-full" />
+        </span>
+      </label>
+      <div className="hidden sm:block w-px h-8 bg-line" />
+      <label className="flex-1 flex items-center gap-3 px-4 py-3 rounded-full hover:bg-white/50 transition-colors cursor-pointer">
+        <CalendarIcon size={17} className="text-espresso2 shrink-0" />
+        <span className="flex flex-col text-left w-full">
+          <span className="text-[10.5px] font-mono tracking-wide text-espresso2">CHECK-OUT</span>
+          <input type="date" value={booking.checkOut} min={booking.checkIn}
+            onChange={(e) => setBooking(b => ({ ...b, checkOut: e.target.value }))}
+            className="bg-transparent text-[14px] font-medium focus:outline-none w-full" />
+        </span>
+      </label>
+      <div className="hidden sm:block w-px h-8 bg-line" />
+      <div className="flex-1 flex items-center justify-between gap-3 px-4 py-3">
+        <span className="flex flex-col text-left">
+          <span className="text-[10.5px] font-mono tracking-wide text-espresso2">GUESTS</span>
+          <span className="text-[14px] font-medium">{booking.guests} guest{booking.guests > 1 ? "s" : ""}</span>
+        </span>
+        <Stepper value={booking.guests} onChange={(v) => setBooking(b => ({ ...b, guests: v }))} min={1} max={8} label="guests" />
+      </div>
+      <button onClick={onSearch}
+        className="tap shrink-0 m-1 sm:m-0 flex items-center justify-center gap-2 rounded-full bg-espresso text-cream px-6 py-3.5 font-medium text-[14.5px] hover:bg-black transition-colors">
+        <SearchIcon size={16} /> Check availability
+      </button>
+    </div>
+  );
+}
+
+/* ============================== HOME PAGE ============================== */
+function Hero({ booking, setBooking, onSearch }) {
+  const [mood, setMood] = useState("golden");
+  const m = MOODS[mood];
+  return (
+    <section className="relative pt-14 sm:pt-20 pb-10">
+      <div className="max-w-[1400px] mx-auto px-5 sm:px-8">
+        <Reveal className="flex flex-wrap items-center gap-3 mb-7">
+          <Badge><MapPinIcon size={13} /> Bole, Addis Ababa</Badge>
+          <Badge><StarIcon size={13} /> 4.9 average, 1,240 stays</Badge>
+        </Reveal>
+        <div className="grid lg:grid-cols-[1.1fr_0.9fr] gap-10 lg:gap-16 items-end">
+          <Reveal delay={80}>
+            <h1 className="text-[42px] sm:text-[60px] lg:text-[72px] leading-[0.98] font-semibold tracking-tight">
+              The city,<br />up close.
+            </h1>
+            <p className="mt-6 text-[17px] sm:text-[19px] text-espresso2 max-w-lg leading-relaxed">
+              A boutique hotel and social club in the heart of Bole — rooms built for staying, and a
+              ground floor built for not wanting to leave it.
+            </p>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <PrimaryButton href="#/rooms" size="lg">See Rooms & Suites</PrimaryButton>
+              <SecondaryButton href="#/dining" size="md">Explore Dining & Spaces</SecondaryButton>
+            </div>
+          </Reveal>
+          <Reveal delay={160} className="w-full">
+            <div className="relative">
+              <Facade mood={mood} className="w-full aspect-[4/3] shadow-[0_30px_80px_-30px_rgba(29,29,31,0.35)]" />
+              <div className="absolute bottom-4 left-4 right-4 glass-dark rounded-full p-1 flex items-center gap-1 border border-white/10">
+                {Object.entries(MOODS).map(([key, val]) => {
+                  const Icon = val.icon;
+                  return (
+                    <button key={key} onClick={() => setMood(key)}
+                      className={`tap flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-full text-[12.5px] font-medium transition-colors ${mood === key ? "bg-cream text-espresso" : "text-cream/70 hover:text-cream"}`}>
+                      <Icon size={13} /> {val.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            <p className="text-[12.5px] font-mono text-espresso2 mt-3 text-center lg:text-left">The facade, live — Social House at {m.label.toLowerCase()}</p>
+          </Reveal>
+        </div>
+        <Reveal delay={240} className="mt-12">
+          <ReservationWidget booking={booking} setBooking={setBooking} onSearch={onSearch} />
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+function BentoGrid() {
+  return (
+    <section className="max-w-[1400px] mx-auto px-5 sm:px-8 py-24 sm:py-32">
+      <Reveal className="flex items-end justify-between mb-10 flex-wrap gap-4">
+        <h2 className="text-[30px] sm:text-[38px] font-semibold tracking-tight max-w-md">Built as a hotel.<br/>Used as a clubhouse.</h2>
+        <p className="text-[15px] text-espresso2 max-w-sm">Four things Social House does that most hotels in the city don't bother with.</p>
+      </Reveal>
+      <div className="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-4">
+        {BENTO.map((b, i) => {
+          const Icon = b.icon;
+          return (
+            <Reveal key={b.id} delay={i * 90} className={b.span}>
+              <a href={b.href} className="group block h-full min-h-[220px] rounded-[28px] border border-line bg-cream2 hover:bg-white transition-colors duration-500 p-7 flex flex-col justify-between">
+                <div className="w-11 h-11 rounded-full bg-white border border-line flex items-center justify-center group-hover:border-brass/50 transition-colors">
+                  <Icon size={19} className="text-espresso" />
+                </div>
+                <div>
+                  <h3 className="text-[19px] font-semibold tracking-tight mb-2 flex items-center gap-1.5">
+                    {b.title}
+                    <ChevronRight size={16} className="opacity-0 group-hover:opacity-100 -translate-x-1 group-hover:translate-x-0 transition-all duration-300" />
+                  </h3>
+                  <p className="text-[14px] text-espresso2 leading-relaxed">{b.desc}</p>
+                </div>
+              </a>
+            </Reveal>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+function TabbedStory() {
+  const [active, setActive] = useState(STORY_TABS[0].id);
+  const tab = STORY_TABS.find(t => t.id === active);
+  return (
+    <section className="bg-espresso text-cream py-24 sm:py-32">
+      <div className="max-w-[1400px] mx-auto px-5 sm:px-8">
+        <Reveal className="mb-12 max-w-lg">
+          <span className="text-[12px] font-mono tracking-wide text-cream/50">SEAMLESS, ON PURPOSE</span>
+          <h2 className="text-[30px] sm:text-[38px] font-semibold tracking-tight mt-3">A stay that runs from your phone.</h2>
+        </Reveal>
+        <Reveal delay={80} className="flex flex-wrap gap-2 mb-10 border-b border-white/10 pb-1">
+          {STORY_TABS.map(t => {
+            const Icon = t.icon;
+            return (
+              <button key={t.id} onClick={() => setActive(t.id)}
+                className={`tap flex items-center gap-2 px-4 py-2.5 rounded-full text-[13.5px] font-medium transition-colors duration-300 ${active === t.id ? "bg-white/10 text-cream" : "text-cream/50 hover:text-cream/80"}`}>
+                <Icon size={15} /> {t.label}
+              </button>
+            );
+          })}
+        </Reveal>
+        <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div key={tab.id} className="reveal in">
+            <h3 className="text-[26px] sm:text-[30px] font-semibold tracking-tight mb-4">{tab.title}</h3>
+            <p className="text-[16px] text-cream/70 leading-relaxed mb-7">{tab.desc}</p>
+            <ul className="space-y-3">
+              {tab.points.map((p, i) => (
+                <li key={i} className="flex items-start gap-3 text-[14.5px] text-cream/85">
+                  <span className="mt-1 w-4 h-4 rounded-full bg-brass/90 flex items-center justify-center shrink-0"><CheckIcon size={10} strokeWidth={2.5} /></span>
+                  {p}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div key={tab.id + "-visual"} className="reveal in">
+            <div className="rounded-[28px] border border-white/10 bg-white/[0.04] p-6 sm:p-8">
+              <div className="rounded-2xl bg-espresso border border-white/10 overflow-hidden">
+                <div className="flex items-center gap-1.5 px-4 py-3 border-b border-white/10">
+                  <span className="w-2.5 h-2.5 rounded-full bg-white/15" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-white/15" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-white/15" />
+                  <span className="ml-3 text-[11px] font-mono text-cream/40">Social House App</span>
+                </div>
+                <div className="p-6 space-y-3">
+                  <div className="flex items-center gap-3 p-4 rounded-xl bg-white/[0.06] border border-white/10">
+                    <div className="w-9 h-9 rounded-full bg-brass/90 flex items-center justify-center shrink-0"><tab.icon size={16} /></div>
+                    <div className="flex-1">
+                      <div className="h-2.5 w-2/3 bg-white/20 rounded-full mb-2" />
+                      <div className="h-2 w-2/5 bg-white/10 rounded-full" />
+                    </div>
+                  </div>
+                  {[1,2,3].map(i => (
+                    <div key={i} className="flex items-center gap-3 p-3.5 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+                      <div className="h-2 rounded-full bg-white/10" style={{ width: `${70 - i*14}%` }} />
+                    </div>
+                  ))}
+                  <div className="flex justify-end pt-1">
+                    <span className="px-4 py-2 rounded-full bg-brass text-espresso text-[12.5px] font-medium">Confirm</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function StatsStrip() {
+  const stats = [
+    ["1996", "Building opened, restored 2019"],
+    ["42", "rooms and suites"],
+    ["9", "floors, rooftop bar on top"],
+    ["4.9", "average guest rating"],
+  ];
+  return (
+    <section className="max-w-[1400px] mx-auto px-5 sm:px-8 py-20 border-t border-line">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+        {stats.map(([n, l], i) => (
+          <Reveal key={i} delay={i * 80}>
+            <div className="text-[34px] sm:text-[42px] font-semibold tracking-tight font-mono">{n}</div>
+            <div className="text-[13.5px] text-espresso2 mt-1">{l}</div>
+          </Reveal>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function CTASection({ onBook }) {
+  return (
+    <section className="max-w-[1400px] mx-auto px-5 sm:px-8 pb-24">
+      <Reveal className="relative rounded-[32px] overflow-hidden border border-line">
+        <Facade mood="night" rounded="rounded-[32px]" className="absolute inset-0 w-full h-full" />
+        <div className="relative px-8 py-16 sm:py-20 sm:px-16 text-center bg-espresso/40">
+          <h2 className="text-[30px] sm:text-[42px] font-semibold tracking-tight text-cream max-w-xl mx-auto">Ready when you are.</h2>
+          <p className="text-cream/70 mt-4 max-w-md mx-auto">Rooms from $180 a night. Check availability in under a minute.</p>
+          <div className="mt-8 flex justify-center">
+            <PrimaryButton onClick={onBook} size="lg" className="!bg-cream !text-espresso hover:!bg-white">Book Now</PrimaryButton>
+          </div>
+        </div>
+      </Reveal>
+    </section>
+  );
+}
+
+function HomePage({ booking, setBooking, onSearch, onBook }) {
+  return (
+    <React.Fragment>
+      <Hero booking={booking} setBooking={setBooking} onSearch={onSearch} />
+      <BentoGrid />
+      <TabbedStory />
+      <StatsStrip />
+      <CTASection onBook={onBook} />
+    </React.Fragment>
+  );
+}
+
+/* ============================== ROOMS PAGE ============================== */
+function RoomCard({ room, onExplore, delay }) {
+  return (
+    <Reveal delay={delay}>
+      <div className="group rounded-[28px] border border-line bg-cream2/60 overflow-hidden hover:shadow-[0_25px_60px_-25px_rgba(29,29,31,0.25)] transition-all duration-500">
+        <div className="overflow-hidden">
+          <Facade mood={room.litRatio > 0.5 ? "golden" : "morning"} rounded="rounded-none"
+            className="aspect-[5/4] transition-transform duration-700 group-hover:scale-[1.06]" />
+        </div>
+        <div className="p-6">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <h3 className="text-[19px] font-semibold tracking-tight">{room.name}</h3>
+              <p className="text-[13px] text-espresso2 mt-0.5">{room.view}</p>
+            </div>
+            <div className="text-right shrink-0">
+              <div className="text-[19px] font-semibold font-mono">{money(room.price)}</div>
+              <div className="text-[11.5px] text-espresso2">/ night</div>
+            </div>
+          </div>
+          <p className="text-[14px] text-espresso2 mt-4 leading-relaxed">{room.blurb}</p>
+          <div className="flex items-center gap-4 mt-5 text-[13px] text-espresso2 font-mono">
+            <span className="flex items-center gap-1.5"><MaximizeIcon size={14} /> {room.sqm} m²</span>
+            <span className="flex items-center gap-1.5"><UsersIcon size={14} /> {room.guests} guests</span>
+          </div>
+          <button onClick={() => onExplore(room)}
+            className="tap mt-6 w-full flex items-center justify-center gap-2 py-3 rounded-full border border-espresso/15 text-[14px] font-medium hover:bg-espresso hover:text-cream transition-colors duration-300">
+            Explore Room <ArrowRight size={14} />
+          </button>
+        </div>
+      </div>
+    </Reveal>
+  );
+}
+
+function RoomDetailModal({ room, onClose, onBookRoom }) {
+  return (
+    <Modal open={!!room} onClose={onClose} wide>
+      {room && (
+        <div>
+          <Facade mood="golden" rounded="rounded-t-[28px] sm:rounded-t-[28px]" className="aspect-[16/9]" />
+          <div className="p-7 sm:p-10">
+            <div className="flex items-start justify-between gap-4 flex-wrap">
+              <div>
+                <h3 className="text-[26px] font-semibold tracking-tight">{room.name}</h3>
+                <p className="text-[14px] text-espresso2 mt-1">{room.view}</p>
+              </div>
+              <div className="text-right">
+                <div className="text-[24px] font-semibold font-mono">{money(room.price)}</div>
+                <div className="text-[12px] text-espresso2">/ night, taxes included</div>
+              </div>
+            </div>
+            <p className="text-[15px] text-espresso2 leading-relaxed mt-5">{room.blurb}</p>
+            <div className="flex flex-wrap gap-3 mt-6">
+              <Badge><MaximizeIcon size={13} /> {room.sqm} m²</Badge>
+              <Badge><UsersIcon size={13} /> Up to {room.guests} guests</Badge>
+              <Badge><WifiIcon size={13} /> Fibre wifi</Badge>
+            </div>
+            <div className="grid grid-cols-2 gap-3 mt-7">
+              {room.features.map((f, i) => (
+                <div key={i} className="flex items-center gap-2.5 text-[14px]">
+                  <span className="w-5 h-5 rounded-full bg-sage/15 text-sage flex items-center justify-center shrink-0"><CheckIcon size={11} strokeWidth={2.5} /></span>
+                  {f}
+                </div>
+              ))}
+            </div>
+            <div className="mt-9 flex flex-col sm:flex-row gap-3">
+              <PrimaryButton onClick={() => onBookRoom(room)} className="flex-1">Book This Room</PrimaryButton>
+              <SecondaryButton onClick={onClose} className="flex-1">Keep Looking</SecondaryButton>
+            </div>
+          </div>
+        </div>
+      )}
+    </Modal>
+  );
+}
+
+function RoomsPage({ onBookRoom }) {
+  const [filter, setFilter] = useState("All Rooms");
+  const [detail, setDetail] = useState(null);
+  const filtered = useMemo(() => {
+    if (filter === "All Rooms") return ROOMS;
+    return ROOMS.filter(r => r.category === filter);
+  }, [filter]);
+  return (
+    <React.Fragment>
+      <section className="max-w-[1400px] mx-auto px-5 sm:px-8 pt-14 sm:pt-20 pb-10">
+        <Reveal>
+          <span className="text-[12px] font-mono tracking-wide text-espresso2">ROOMS & SUITES</span>
+          <h1 className="text-[38px] sm:text-[54px] font-semibold tracking-tight mt-3 max-w-xl">A room for every version of a trip.</h1>
+          <p className="text-[16px] text-espresso2 mt-4 max-w-lg leading-relaxed">Four layouts, all drawn for this building specifically — from a well-made studio to a top-floor penthouse with its own terrace.</p>
+        </Reveal>
+        <Reveal delay={100} className="flex gap-2 mt-9 flex-wrap">
+          {ROOM_FILTERS.map(f => (
+            <button key={f} onClick={() => setFilter(f)}
+              className={`tap px-5 py-2.5 rounded-full text-[13.5px] font-medium border transition-colors duration-300 ${filter === f ? "bg-espresso text-cream border-espresso" : "border-line text-espresso2 hover:border-espresso/40"}`}>
+              {f}
+            </button>
+          ))}
+        </Reveal>
+      </section>
+      <section className="max-w-[1400px] mx-auto px-5 sm:px-8 pb-28">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-2 gap-6">
+          {filtered.map((r, i) => <RoomCard key={r.id} room={r} onExplore={setDetail} delay={i * 80} />)}
+        </div>
+        {filtered.length === 0 && <p className="text-espresso2 text-center py-20">No rooms in this category yet.</p>}
+      </section>
+      <RoomDetailModal room={detail} onClose={() => setDetail(null)} onBookRoom={(r) => { setDetail(null); onBookRoom(r); }} />
+    </React.Fragment>
+  );
+}
+
+/* ============================== DINING PAGE ============================== */
+function ReserveTableModal({ venue, onClose }) {
+  const [done, setDone] = useState(false);
+  return (
+    <Modal open={!!venue} onClose={() => { onClose(); setTimeout(() => setDone(false), 300); }}>
+      {venue && !done && (
+        <form className="p-7 sm:p-9" onSubmit={(e) => { e.preventDefault(); setDone(true); }}>
+          <h3 className="text-[22px] font-semibold tracking-tight mb-1">Reserve at {venue.name}</h3>
+          <p className="text-[13.5px] text-espresso2 mb-6">{venue.kicker}</p>
+          <div className="grid grid-cols-2 gap-3">
+            <label className="block">
+              <span className="text-[11.5px] font-mono text-espresso2">DATE</span>
+              <input required type="date" className="mt-1 w-full px-3.5 py-2.5 rounded-xl border border-line bg-white/70 text-[14px] focus:outline-none focus:border-espresso/40" />
+            </label>
+            <label className="block">
+              <span className="text-[11.5px] font-mono text-espresso2">TIME</span>
+              <input required type="time" className="mt-1 w-full px-3.5 py-2.5 rounded-xl border border-line bg-white/70 text-[14px] focus:outline-none focus:border-espresso/40" />
+            </label>
+          </div>
+          <label className="block mt-3">
+            <span className="text-[11.5px] font-mono text-espresso2">PARTY SIZE</span>
+            <input required type="number" min="1" max="20" defaultValue="2" className="mt-1 w-full px-3.5 py-2.5 rounded-xl border border-line bg-white/70 text-[14px] focus:outline-none focus:border-espresso/40" />
+          </label>
+          <label className="block mt-3">
+            <span className="text-[11.5px] font-mono text-espresso2">NAME</span>
+            <input required type="text" placeholder="Full name" className="mt-1 w-full px-3.5 py-2.5 rounded-xl border border-line bg-white/70 text-[14px] focus:outline-none focus:border-espresso/40" />
+          </label>
+          <PrimaryButton className="w-full mt-6">Confirm Reservation</PrimaryButton>
+        </form>
+      )}
+      {venue && done && (
+        <div className="p-9 text-center">
+          <div className="w-14 h-14 rounded-full bg-sage/15 text-sage flex items-center justify-center mx-auto mb-5"><CheckIcon size={24} /></div>
+          <h3 className="text-[22px] font-semibold tracking-tight">Table held.</h3>
+          <p className="text-[14.5px] text-espresso2 mt-2">We've reserved your table at {venue.name}. A confirmation is on its way to your email.</p>
+          <SecondaryButton onClick={() => { onClose(); setTimeout(() => setDone(false), 300); }} className="mt-7">Close</SecondaryButton>
+        </div>
+      )}
+    </Modal>
+  );
+}
+
+function DiningBlock({ venue, index }) {
+  const [showMenu, setShowMenu] = useState(false);
+  const reverse = index % 2 === 1;
+  const Icon = venue.icon;
+  return (
+    <Reveal className={`grid lg:grid-cols-2 gap-10 lg:gap-16 items-center py-16 sm:py-20 border-b border-line last:border-none`}>
+      <div className={reverse ? "lg:order-2" : ""}>
+        <Facade mood={index === 1 ? "night" : "golden"} className="aspect-[4/3]" />
+      </div>
+      <div className={reverse ? "lg:order-1" : ""}>
+        <div className="w-11 h-11 rounded-full bg-cream2 border border-line flex items-center justify-center mb-5"><Icon size={19} /></div>
+        <span className="text-[12px] font-mono tracking-wide text-espresso2">{venue.kicker.toUpperCase()}</span>
+        <h3 className="text-[28px] sm:text-[34px] font-semibold tracking-tight mt-2">{venue.name}</h3>
+        <p className="text-[15px] text-espresso2 leading-relaxed mt-4">{venue.blurb}</p>
+        <div className="mt-6 space-y-1.5">
+          {venue.hours.map(([label, time], i) => (
+            <div key={i} className="flex items-center gap-2.5 text-[13.5px] text-espresso2">
+              <ClockIcon size={14} className="shrink-0" /> <span className="font-medium text-espresso w-24 shrink-0">{label}</span> {time}
+            </div>
+          ))}
+        </div>
+        <div className="mt-7 flex flex-wrap gap-3">
+          <button onClick={() => setShowMenu(s => !s)}
+            className="tap inline-flex items-center gap-2 px-5 py-3 rounded-full border border-espresso/15 text-[14px] font-medium hover:border-espresso/40 transition-colors">
+            {showMenu ? "Hide Menu" : "View Menu"} <ChevronDown size={15} className={`transition-transform duration-300 ${showMenu ? "rotate-180" : ""}`} />
+          </button>
+          <PrimaryButton onClick={() => window.dispatchEvent(new CustomEvent("reserve-table", { detail: venue }))} size="md">Reserve a Table</PrimaryButton>
+        </div>
+        {showMenu && (
+          <div className="mt-5 rounded-2xl border border-line bg-cream2/70 p-5 space-y-3 reveal in">
+            {venue.menu.map(([item, price], i) => (
+              <div key={i} className="flex items-center justify-between text-[14px]">
+                <span>{item}</span>
+                <span className="font-mono text-espresso2">{price}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </Reveal>
+  );
+}
+
+function DiningPage() {
+  const [reserveVenue, setReserveVenue] = useState(null);
+  useEffect(() => {
+    const handler = (e) => setReserveVenue(e.detail);
+    window.addEventListener("reserve-table", handler);
+    return () => window.removeEventListener("reserve-table", handler);
+  }, []);
+  return (
+    <React.Fragment>
+      <section className="max-w-[1400px] mx-auto px-5 sm:px-8 pt-14 sm:pt-20 pb-6">
+        <Reveal>
+          <span className="text-[12px] font-mono tracking-wide text-espresso2">DINING & SPACES</span>
+          <h1 className="text-[38px] sm:text-[54px] font-semibold tracking-tight mt-3 max-w-xl">Three rooms, one ground floor.</h1>
+          <p className="text-[16px] text-espresso2 mt-4 max-w-lg leading-relaxed">The restaurant, the rooftop, and the co-working lounge — built to be used by guests and neighbors alike.</p>
+        </Reveal>
+      </section>
+      <section className="max-w-[1400px] mx-auto px-5 sm:px-8">
+        {DINING.map((v, i) => <DiningBlock key={v.id} venue={v} index={i} />)}
+      </section>
+      <ReserveTableModal venue={reserveVenue} onClose={() => setReserveVenue(null)} />
+    </React.Fragment>
+  );
+}
+
+/* ============================== EXPERIENCE PAGE ============================== */
+function NeighborhoodMap({ items, active, onSelect }) {
+  const positions = {
+    "unity-park": [72, 22], "friendship-park": [58, 55], "yared-roasters": [30, 40],
+    "kuriftu-gallery": [45, 18], "edna-cinema": [80, 60], "shola-market": [20, 68],
+    "bole-craft": [38, 72], "entoto-lookout": [15, 12],
+  };
+  return (
+    <div className="relative rounded-[28px] border border-line bg-cream2 overflow-hidden aspect-square">
+      <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full opacity-[0.35]">
+        <path d="M0 30 Q 30 20 50 35 T 100 25" stroke="#5C6B57" strokeWidth="0.6" fill="none" />
+        <path d="M10 0 L 15 100" stroke="#1D1D1F" strokeWidth="0.3" fill="none" opacity="0.3" />
+        <path d="M0 55 L 100 48" stroke="#1D1D1F" strokeWidth="0.3" fill="none" opacity="0.3" />
+        <path d="M60 0 L 55 100" stroke="#1D1D1F" strokeWidth="0.3" fill="none" opacity="0.3" />
+        <circle cx="50" cy="50" r="3" fill="#A67C52" opacity="0.25" />
+      </svg>
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
+        <span className="w-3.5 h-3.5 rounded-full bg-espresso border-2 border-cream shadow" />
+        <span className="text-[10px] font-mono mt-1 bg-cream/90 px-1.5 py-0.5 rounded">Social House</span>
+      </div>
+      {items.map(item => {
+        const [x, y] = positions[item.id] || [50, 50];
+        const isActive = active === item.id;
+        return (
+          <button key={item.id} onClick={() => onSelect(item.id)}
+            style={{ left: `${x}%`, top: `${y}%` }}
+            className={`tap absolute -translate-x-1/2 -translate-y-1/2 flex items-center justify-center rounded-full transition-all duration-300 ${isActive ? "w-8 h-8 bg-brass text-cream z-10 shadow-lg" : "w-6 h-6 bg-white text-espresso border border-line hover:border-brass/60"}`}
+            aria-label={item.name}>
+            <MapPinIcon size={isActive ? 14 : 11} />
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function ExperiencePage() {
+  const [cat, setCat] = useState("All");
+  const [active, setActive] = useState(NEIGHBORHOOD[0].id);
+  const filtered = useMemo(() => cat === "All" ? NEIGHBORHOOD : NEIGHBORHOOD.filter(n => n.category === cat), [cat]);
+  return (
+    <section className="max-w-[1400px] mx-auto px-5 sm:px-8 pt-14 sm:pt-20 pb-28">
+      <Reveal>
+        <span className="text-[12px] font-mono tracking-wide text-espresso2">EXPERIENCE & NEIGHBORHOOD</span>
+        <h1 className="text-[38px] sm:text-[54px] font-semibold tracking-tight mt-3 max-w-xl">The locale, as we'd walk it.</h1>
+        <p className="text-[16px] text-espresso2 mt-4 max-w-lg leading-relaxed">A short list of the places our own front desk actually sends people to — kept current, not comprehensive.</p>
+      </Reveal>
+      <Reveal delay={100} className="flex gap-2 mt-9 flex-wrap">
+        {NEIGHBORHOOD_CATEGORIES.map(c => (
+          <button key={c} onClick={() => setCat(c)}
+            className={`tap px-4 py-2 rounded-full text-[13px] font-medium border transition-colors duration-300 ${cat === c ? "bg-espresso text-cream border-espresso" : "border-line text-espresso2 hover:border-espresso/40"}`}>
+            {c}
+          </button>
+        ))}
+      </Reveal>
+      <div className="grid lg:grid-cols-[0.85fr_1.15fr] gap-8 mt-10 items-start">
+        <Reveal delay={140} className="lg:sticky lg:top-24">
+          <NeighborhoodMap items={filtered} active={active} onSelect={setActive} />
+        </Reveal>
+        <div className="grid sm:grid-cols-2 gap-4">
+          {filtered.map((n, i) => {
+            const Icon = n.icon;
+            const isActive = active === n.id;
+            return (
+              <Reveal key={n.id} delay={i * 70}>
+                <button onClick={() => setActive(n.id)}
+                  className={`text-left w-full rounded-2xl border p-5 h-full transition-all duration-300 ${isActive ? "border-brass/60 bg-white shadow-[0_15px_40px_-20px_rgba(29,29,31,0.25)]" : "border-line bg-cream2/50 hover:border-espresso/25"}`}>
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="w-9 h-9 rounded-full bg-cream flex items-center justify-center border border-line shrink-0"><Icon size={16} /></div>
+                    <span className="text-[11.5px] font-mono text-espresso2 shrink-0">{n.walk}</span>
+                  </div>
+                  <h3 className="text-[16px] font-semibold tracking-tight mt-3">{n.name}</h3>
+                  <p className="text-[12.5px] text-espresso2 mt-1">{n.category}</p>
+                  <p className="text-[13.5px] text-espresso2 mt-2.5 leading-relaxed">{n.blurb}</p>
+                </button>
+              </Reveal>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ============================== CONTACT PAGE ============================== */
+function ContactPage() {
+  const [sent, setSent] = useState(false);
+  return (
+    <section className="max-w-[1400px] mx-auto px-5 sm:px-8 pt-14 sm:pt-20 pb-28">
+      <Reveal>
+        <span className="text-[12px] font-mono tracking-wide text-espresso2">CONTACT</span>
+        <h1 className="text-[38px] sm:text-[54px] font-semibold tracking-tight mt-3 max-w-xl">Talk to the front desk.</h1>
+        <p className="text-[16px] text-espresso2 mt-4 max-w-lg leading-relaxed">For groups, events, or anything a booking form can't answer, write to us directly.</p>
+      </Reveal>
+      <div className="grid lg:grid-cols-2 gap-12 mt-12">
+        <Reveal delay={80}>
+          {!sent ? (
+            <form onSubmit={(e) => { e.preventDefault(); setSent(true); }} className="space-y-4 max-w-md">
+              <input required placeholder="Full name" className="w-full px-4 py-3.5 rounded-xl border border-line bg-white/70 text-[14.5px] focus:outline-none focus:border-espresso/40" />
+              <input required type="email" placeholder="Email address" className="w-full px-4 py-3.5 rounded-xl border border-line bg-white/70 text-[14.5px] focus:outline-none focus:border-espresso/40" />
+              <textarea required placeholder="Message" rows="5" className="w-full px-4 py-3.5 rounded-xl border border-line bg-white/70 text-[14.5px] focus:outline-none focus:border-espresso/40 resize-none" />
+              <PrimaryButton className="w-full">Send Message</PrimaryButton>
+            </form>
+          ) : (
+            <div className="max-w-md rounded-2xl border border-line bg-cream2 p-8">
+              <div className="w-12 h-12 rounded-full bg-sage/15 text-sage flex items-center justify-center mb-4"><CheckIcon size={20} /></div>
+              <h3 className="text-[19px] font-semibold">Message sent.</h3>
+              <p className="text-[14px] text-espresso2 mt-2">Someone from the front desk will reply within a day.</p>
+            </div>
+          )}
+        </Reveal>
+        <Reveal delay={140}>
+          <Facade mood="morning" className="aspect-[4/3] mb-6" />
+          <ul className="space-y-3 text-[14.5px] text-espresso2">
+            <li className="flex items-center gap-3"><MapPinIcon size={16} /> Cameroon Street, Bole, Addis Ababa</li>
+            <li className="flex items-center gap-3"><PhoneIcon size={16} /> +251 911 234 567</li>
+            <li className="flex items-center gap-3"><MailIcon size={16} /> stay@socialhouse.et</li>
+            <li className="flex items-center gap-3"><ClockIcon size={16} /> Front desk, 24 hours</li>
+          </ul>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+/* ============================== BOOKING PAGE ============================== */
+const BOOKING_STEPS = ["Dates", "Room", "Add-ons", "Guest Details", "Checkout"];
+
+function BookingStepper({ step }) {
+  return (
+    <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1">
+      {BOOKING_STEPS.map((s, i) => (
+        <React.Fragment key={s}>
+          <div className="flex items-center gap-2 shrink-0">
+            <span className={`w-7 h-7 rounded-full flex items-center justify-center text-[12px] font-mono shrink-0 transition-colors duration-300 ${i < step ? "bg-sage text-cream" : i === step ? "bg-espresso text-cream" : "bg-cream2 text-espresso2 border border-line"}`}>
+              {i < step ? <CheckIcon size={12} /> : i + 1}
+            </span>
+            <span className={`text-[13px] font-medium hidden sm:inline ${i === step ? "text-espresso" : "text-espresso2"}`}>{s}</span>
+          </div>
+          {i < BOOKING_STEPS.length - 1 && <span className="w-5 sm:w-8 h-px bg-line shrink-0" />}
+        </React.Fragment>
+      ))}
+    </div>
+  );
+}
+
+function BookingPage({ booking, setBooking, initialStep }) {
+  const [step, setStep] = useState(initialStep || 0);
+  const [guestInfo, setGuestInfo] = useState({ name: "", email: "", phone: "", requests: "" });
+  const room = ROOMS.find(r => r.id === booking.selectedRoomId) || null;
+  const nights = nightsBetween(booking.checkIn, booking.checkOut) || 1;
+  const addonsTotal = booking.addons.reduce((sum, id) => {
+    const a = ADDONS.find(x => x.id === id);
+    if (!a) return sum;
+    return sum + (a.unit === "/ night" ? a.price * nights : a.price);
+  }, 0);
+  const roomTotal = room ? room.price * nights : 0;
+  const total = roomTotal + addonsTotal;
+
+  const toggleAddon = (id) => setBooking(b => ({
+    ...b, addons: b.addons.includes(id) ? b.addons.filter(a => a !== id) : [...b.addons, id]
+  }));
+
+  const canNext = [
+    !!(booking.checkIn && booking.checkOut && nightsBetween(booking.checkIn, booking.checkOut) > 0),
+    !!room,
+    true,
+    !!(guestInfo.name && guestInfo.email),
+    true,
+  ];
+
+  if (step === 5) {
+    const ref = "SH-" + Math.random().toString(36).slice(2, 8).toUpperCase();
+    return (
+      <section className="max-w-[720px] mx-auto px-5 sm:px-8 pt-16 sm:pt-24 pb-28 text-center">
+        <Reveal>
+          <div className="w-16 h-16 rounded-full bg-sage/15 text-sage flex items-center justify-center mx-auto mb-6"><CheckIcon size={26} /></div>
+          <h1 className="text-[30px] sm:text-[38px] font-semibold tracking-tight">You're booked in.</h1>
+          <p className="text-[15px] text-espresso2 mt-3">Confirmation sent to {guestInfo.email || "your inbox"}. We'll see you at the door.</p>
+        </Reveal>
+        <Reveal delay={100} className="mt-10 rounded-[28px] border border-line bg-cream2 p-7 sm:p-9 text-left">
+          <div className="flex items-center justify-between pb-5 border-b border-line">
+            <span className="font-mono text-[13px] text-espresso2">BOOKING REFERENCE</span>
+            <span className="font-mono text-[15px] font-semibold">{ref}</span>
+          </div>
+          <div className="py-5 space-y-3 border-b border-line">
+            <div className="flex justify-between text-[14.5px]"><span className="text-espresso2">Room</span><span className="font-medium">{room?.name}</span></div>
+            <div className="flex justify-between text-[14.5px]"><span className="text-espresso2">Check-in</span><span className="font-medium">{fmtDate(booking.checkIn)}</span></div>
+            <div className="flex justify-between text-[14.5px]"><span className="text-espresso2">Check-out</span><span className="font-medium">{fmtDate(booking.checkOut)}</span></div>
+            <div className="flex justify-between text-[14.5px]"><span className="text-espresso2">Guests</span><span className="font-medium">{booking.guests}</span></div>
+          </div>
+          <div className="pt-5 flex justify-between items-center">
+            <span className="text-[14.5px] text-espresso2">Total paid</span>
+            <span className="text-[22px] font-semibold font-mono">{money(total)}</span>
+          </div>
+        </Reveal>
+        <Reveal delay={180} className="mt-8 flex flex-wrap gap-3 justify-center">
+          <PrimaryButton href="#/">Back to Home</PrimaryButton>
+          <SecondaryButton href="#/experience">Plan the Neighborhood</SecondaryButton>
+        </Reveal>
+      </section>
+    );
+  }
+
+  return (
+    <section className="max-w-[1000px] mx-auto px-5 sm:px-8 pt-12 sm:pt-16 pb-28">
+      <Reveal>
+        <span className="text-[12px] font-mono tracking-wide text-espresso2">RESERVATION</span>
+        <h1 className="text-[30px] sm:text-[40px] font-semibold tracking-tight mt-2">Book your stay</h1>
+      </Reveal>
+      <Reveal delay={60} className="mt-8"><BookingStepper step={step} /></Reveal>
+
+      <div className="grid lg:grid-cols-[1fr_320px] gap-10 mt-9">
+        <Reveal delay={100} key={step} className="reveal in rounded-[28px] border border-line bg-cream2/50 p-6 sm:p-8">
+          {step === 0 && (
+            <div>
+              <h2 className="text-[20px] font-semibold tracking-tight mb-6">When are you staying?</h2>
+              <div className="grid sm:grid-cols-2 gap-4">
+                <label className="block">
+                  <span className="text-[11.5px] font-mono text-espresso2">CHECK-IN</span>
+                  <input type="date" value={booking.checkIn} onChange={(e) => setBooking(b => ({ ...b, checkIn: e.target.value }))}
+                    className="mt-1.5 w-full px-4 py-3 rounded-xl border border-line bg-white text-[14.5px] focus:outline-none focus:border-espresso/40" />
+                </label>
+                <label className="block">
+                  <span className="text-[11.5px] font-mono text-espresso2">CHECK-OUT</span>
+                  <input type="date" value={booking.checkOut} min={booking.checkIn} onChange={(e) => setBooking(b => ({ ...b, checkOut: e.target.value }))}
+                    className="mt-1.5 w-full px-4 py-3 rounded-xl border border-line bg-white text-[14.5px] focus:outline-none focus:border-espresso/40" />
+                </label>
+              </div>
+              <div className="flex items-center justify-between mt-6 p-4 rounded-xl bg-white border border-line">
+                <span className="text-[14px] font-medium">Guests</span>
+                <Stepper value={booking.guests} onChange={(v) => setBooking(b => ({ ...b, guests: v }))} min={1} max={8} label="guests" />
+              </div>
+              {!canNext[0] && booking.checkIn && <p className="text-[13px] text-brassDeep mt-3">Check-out needs to be after check-in.</p>}
+            </div>
+          )}
+
+          {step === 1 && (
+            <div>
+              <h2 className="text-[20px] font-semibold tracking-tight mb-6">Choose a room</h2>
+              <div className="space-y-3">
+                {ROOMS.map(r => (
+                  <button key={r.id} onClick={() => setBooking(b => ({ ...b, selectedRoomId: r.id }))}
+                    className={`w-full text-left flex items-center gap-4 p-4 rounded-2xl border transition-all duration-300 ${booking.selectedRoomId === r.id ? "border-brass bg-white shadow-sm" : "border-line bg-white/50 hover:border-espresso/25"}`}>
+                    <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0"><Facade mood="golden" rounded="rounded-xl" className="w-full h-full" /></div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="font-semibold text-[15px] truncate">{r.name}</span>
+                        <span className="font-mono text-[14.5px] shrink-0">{money(r.price)}<span className="text-espresso2 text-[12px]">/night</span></span>
+                      </div>
+                      <span className="text-[12.5px] text-espresso2">{r.sqm} m² · up to {r.guests} guests</span>
+                    </div>
+                    <span className={`w-5 h-5 rounded-full border shrink-0 flex items-center justify-center ${booking.selectedRoomId === r.id ? "bg-brass border-brass" : "border-espresso/20"}`}>
+                      {booking.selectedRoomId === r.id && <CheckIcon size={11} className="text-cream" strokeWidth={3} />}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {step === 2 && (
+            <div>
+              <h2 className="text-[20px] font-semibold tracking-tight mb-1">Add anything to the stay?</h2>
+              <p className="text-[13.5px] text-espresso2 mb-6">Optional — skip ahead if you'd rather decide at the desk.</p>
+              <div className="space-y-3">
+                {ADDONS.map(a => {
+                  const checked = booking.addons.includes(a.id);
+                  return (
+                    <button key={a.id} onClick={() => toggleAddon(a.id)}
+                      className={`w-full text-left flex items-center gap-4 p-4 rounded-2xl border transition-all duration-300 ${checked ? "border-brass bg-white shadow-sm" : "border-line bg-white/50 hover:border-espresso/25"}`}>
+                      <span className={`w-5 h-5 rounded-md border shrink-0 flex items-center justify-center ${checked ? "bg-brass border-brass" : "border-espresso/20"}`}>
+                        {checked && <CheckIcon size={11} className="text-cream" strokeWidth={3} />}
+                      </span>
+                      <div className="flex-1">
+                        <div className="text-[14.5px] font-medium">{a.name}</div>
+                        <div className="text-[12.5px] text-espresso2">{a.desc}</div>
+                      </div>
+                      <span className="font-mono text-[13.5px] shrink-0">{money(a.price)} <span className="text-espresso2 text-[11px]">{a.unit}</span></span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {step === 3 && (
+            <div>
+              <h2 className="text-[20px] font-semibold tracking-tight mb-6">Who's checking in?</h2>
+              <div className="grid sm:grid-cols-2 gap-4">
+                <label className="block">
+                  <span className="text-[11.5px] font-mono text-espresso2">FULL NAME</span>
+                  <input required value={guestInfo.name} onChange={(e) => setGuestInfo(g => ({ ...g, name: e.target.value }))}
+                    className="mt-1.5 w-full px-4 py-3 rounded-xl border border-line bg-white text-[14.5px] focus:outline-none focus:border-espresso/40" />
+                </label>
+                <label className="block">
+                  <span className="text-[11.5px] font-mono text-espresso2">EMAIL</span>
+                  <input required type="email" value={guestInfo.email} onChange={(e) => setGuestInfo(g => ({ ...g, email: e.target.value }))}
+                    className="mt-1.5 w-full px-4 py-3 rounded-xl border border-line bg-white text-[14.5px] focus:outline-none focus:border-espresso/40" />
+                </label>
+                <label className="block">
+                  <span className="text-[11.5px] font-mono text-espresso2">PHONE</span>
+                  <input type="tel" value={guestInfo.phone} onChange={(e) => setGuestInfo(g => ({ ...g, phone: e.target.value }))}
+                    className="mt-1.5 w-full px-4 py-3 rounded-xl border border-line bg-white text-[14.5px] focus:outline-none focus:border-espresso/40" />
+                </label>
+                <label className="block sm:col-span-2">
+                  <span className="text-[11.5px] font-mono text-espresso2">SPECIAL REQUESTS</span>
+                  <textarea rows="3" value={guestInfo.requests} onChange={(e) => setGuestInfo(g => ({ ...g, requests: e.target.value }))}
+                    className="mt-1.5 w-full px-4 py-3 rounded-xl border border-line bg-white text-[14.5px] focus:outline-none focus:border-espresso/40 resize-none" />
+                </label>
+              </div>
+            </div>
+          )}
+
+          {step === 4 && (
+            <div>
+              <h2 className="text-[20px] font-semibold tracking-tight mb-6">Secure checkout</h2>
+              <div className="grid sm:grid-cols-2 gap-4">
+                <label className="block sm:col-span-2">
+                  <span className="text-[11.5px] font-mono text-espresso2">CARD NUMBER</span>
+                  <div className="mt-1.5 relative">
+                    <CreditCardIcon size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-espresso2" />
+                    <input placeholder="4242 4242 4242 4242" className="w-full pl-11 pr-4 py-3 rounded-xl border border-line bg-white text-[14.5px] focus:outline-none focus:border-espresso/40" />
+                  </div>
+                </label>
+                <label className="block">
+                  <span className="text-[11.5px] font-mono text-espresso2">EXPIRY</span>
+                  <input placeholder="MM / YY" className="mt-1.5 w-full px-4 py-3 rounded-xl border border-line bg-white text-[14.5px] focus:outline-none focus:border-espresso/40" />
+                </label>
+                <label className="block">
+                  <span className="text-[11.5px] font-mono text-espresso2">CVC</span>
+                  <input placeholder="123" className="mt-1.5 w-full px-4 py-3 rounded-xl border border-line bg-white text-[14.5px] focus:outline-none focus:border-espresso/40" />
+                </label>
+              </div>
+              <div className="flex items-center gap-2 mt-5 text-[12.5px] text-espresso2">
+                <ShieldIcon size={14} /> Payments are encrypted end to end. You won't be charged until 24 hours before arrival.
+              </div>
+            </div>
+          )}
+        </Reveal>
+
+        <Reveal delay={140} className="rounded-[28px] border border-line bg-white p-6 h-fit lg:sticky lg:top-24">
+          <h3 className="text-[13px] font-mono tracking-wide text-espresso2 mb-4">SUMMARY</h3>
+          {room ? (
+            <div className="flex items-center gap-3 pb-4 border-b border-line mb-4">
+              <div className="w-12 h-12 rounded-lg overflow-hidden shrink-0"><Facade mood="golden" rounded="rounded-lg" className="w-full h-full" /></div>
+              <div className="min-w-0">
+                <div className="text-[14px] font-medium truncate">{room.name}</div>
+                <div className="text-[12px] text-espresso2">{nights} night{nights > 1 ? "s" : ""} · {booking.guests} guests</div>
+              </div>
+            </div>
+          ) : (
+            <p className="text-[13.5px] text-espresso2 pb-4 border-b border-line mb-4">No room selected yet.</p>
+          )}
+          <div className="space-y-2 text-[13.5px]">
+            <div className="flex justify-between"><span className="text-espresso2">Check-in</span><span>{booking.checkIn ? fmtDate(booking.checkIn) : "—"}</span></div>
+            <div className="flex justify-between"><span className="text-espresso2">Check-out</span><span>{booking.checkOut ? fmtDate(booking.checkOut) : "—"}</span></div>
+            {room && <div className="flex justify-between"><span className="text-espresso2">Room ({nights}n)</span><span className="font-mono">{money(roomTotal)}</span></div>}
+            {booking.addons.length > 0 && <div className="flex justify-between"><span className="text-espresso2">Add-ons</span><span className="font-mono">{money(addonsTotal)}</span></div>}
+          </div>
+          <div className="flex justify-between items-center pt-4 mt-4 border-t border-line">
+            <span className="text-[14px] font-medium">Total</span>
+            <span className="text-[20px] font-semibold font-mono">{money(total)}</span>
+          </div>
+        </Reveal>
+      </div>
+
+      <div className="flex items-center justify-between mt-8">
+        <button onClick={() => setStep(s => Math.max(0, s - 1))} disabled={step === 0}
+          className="tap flex items-center gap-1.5 px-5 py-3 rounded-full text-[14px] font-medium disabled:opacity-0 hover:bg-cream2 transition-colors">
+          <ChevronLeft size={16} /> Back
+        </button>
+        <PrimaryButton
+          onClick={() => canNext[step] && setStep(s => Math.min(5, s + 1))}
+          className={!canNext[step] ? "opacity-40 pointer-events-none" : ""}
+          icon={step === 4 ? CheckIcon : ArrowRight}>
+          {step === 4 ? "Confirm & Pay " + money(total) : "Continue"}
+        </PrimaryButton>
+      </div>
+    </section>
+  );
+}
+
+/* ============================== APP ============================== */
+function App() {
+  const hash = useHashRoute();
+  const route = (hash.split("?")[0]) || "#/";
+  const [booking, setBooking] = useState({
+    checkIn: "", checkOut: "", guests: 2, selectedRoomId: null, addons: [],
+  });
+  const [bookingStep, setBookingStep] = useState(0);
+
+  useEffect(() => { window.scrollTo(0, 0); }, [route]);
+
+  const goBooking = useCallback((presetStep) => {
+    setBookingStep(presetStep || 0);
+    navigate("#/booking");
+  }, []);
+
+  const onSearch = useCallback(() => { goBooking(0); }, [goBooking]);
+  const onBookRoom = useCallback((room) => {
+    setBooking(b => ({ ...b, selectedRoomId: room.id }));
+    goBooking(booking.checkIn && booking.checkOut ? 2 : 0);
+  }, [goBooking, booking.checkIn, booking.checkOut]);
+  const onBookGeneric = useCallback(() => goBooking(0), [goBooking]);
+
+  let page;
+  if (route === "#/rooms") page = <RoomsPage onBookRoom={onBookRoom} />;
+  else if (route === "#/dining") page = <DiningPage />;
+  else if (route === "#/experience") page = <ExperiencePage />;
+  else if (route === "#/contact") page = <ContactPage />;
+  else if (route === "#/booking") page = <BookingPage booking={booking} setBooking={setBooking} initialStep={bookingStep} key={bookingStep} />;
+  else page = <HomePage booking={booking} setBooking={setBooking} onSearch={onSearch} onBook={onBookGeneric} />;
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Header route={route} onBook={onBookGeneric} />
+      <main className="flex-1">{page}</main>
+      <Footer />
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+  </html>
