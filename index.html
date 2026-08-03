@@ -291,10 +291,10 @@ const STORY_TABS = [
 ];
 
 const BENTO = [
-  { id: "lounge", title: "The Lounge", desc: "Coffee by 7, cocktails by 7 — the ground floor doesn't have a bedtime.", icon: CoffeeIcon, span: "md:col-span-2 md:row-span-2", href: "#/dining" },
-  { id: "rooms", title: "Design-Driven Rooms", desc: "Every room drawn from scratch for this building, not picked from a catalogue.", icon: BedIcon, span: "md:col-span-2", href: "#/rooms" },
-  { id: "neighborhood", title: "Curated Neighborhood", desc: "A walking guide to Bole, kept current by the people at the front desk.", icon: MapPinIcon, span: "", href: "#/experience" },
-  { id: "seamless", title: "Seamless Stay", desc: "Digital key, room controls, and checkout — all from your phone.", icon: KeyIcon, span: "", href: "#/experience" },
+  { id: "lounge", title: "The Lounge", desc: "Coffee by 7, cocktails by 7 — the ground floor doesn't have a bedtime.", icon: CoffeeIcon, span: "md:col-span-2 md:row-span-2", href: "#/dining", image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=80" },
+  { id: "rooms", title: "Design-Driven Rooms", desc: "Every room drawn from scratch for this building, not picked from a catalogue.", icon: BedIcon, span: "md:col-span-2", href: "#/rooms", image: "https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&w=1200&q=80" },
+  { id: "neighborhood", title: "Curated Neighborhood", desc: "A walking guide to Bole, kept current by the people at the front desk.", icon: MapPinIcon, span: "", href: "#/experience", image: "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=1200&q=80" },
+  { id: "seamless", title: "Seamless Stay", desc: "Digital key, room controls, and checkout — all from your phone.", icon: KeyIcon, span: "", href: "#/experience", image: "https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?auto=format&fit=crop&w=1200&q=80" },
 ];
 
 /* ============================== HELPERS ============================== */
@@ -644,16 +644,26 @@ function BentoGrid() {
           const Icon = b.icon;
           return (
             <Reveal key={b.id} delay={i * 90} className={b.span}>
-              <a href={b.href} className="group block h-full min-h-[220px] rounded-[28px] border border-line bg-cream2 hover:bg-white transition-colors duration-500 p-7 flex flex-col justify-between">
-                <div className="w-11 h-11 rounded-full bg-white border border-line flex items-center justify-center group-hover:border-brass/50 transition-colors">
+              <a href={b.href} className="group relative block h-full min-h-[260px] rounded-[28px] border border-line bg-cream2 overflow-hidden transition-all duration-500 p-7 flex flex-col justify-between shadow-sm hover:shadow-xl">
+                {b.image && (
+                  <div className="absolute inset-0 z-0 overflow-hidden">
+                    <img 
+                      src={b.image} 
+                      alt={b.title} 
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-espresso/90 via-espresso/40 to-espresso/20 group-hover:via-espresso/30 transition-colors duration-500" />
+                  </div>
+                )}
+                <div className="relative z-10 w-11 h-11 rounded-full bg-white/90 backdrop-blur-md border border-line flex items-center justify-center group-hover:border-brass/50 transition-colors">
                   <Icon size={19} className="text-espresso" />
                 </div>
-                <div>
-                  <h3 className="text-[19px] font-semibold tracking-tight mb-2 flex items-center gap-1.5">
+                <div className="relative z-10">
+                  <h3 className={`text-[19px] font-semibold tracking-tight mb-2 flex items-center gap-1.5 ${b.image ? "text-cream" : "text-espresso"}`}>
                     {b.title}
                     <ChevronRight size={16} className="opacity-0 group-hover:opacity-100 -translate-x-1 group-hover:translate-x-0 transition-all duration-300" />
                   </h3>
-                  <p className="text-[14px] text-espresso2 leading-relaxed">{b.desc}</p>
+                  <p className={`text-[14px] leading-relaxed ${b.image ? "text-cream/80" : "text-espresso2"}`}>{b.desc}</p>
                 </div>
               </a>
             </Reveal>
