@@ -27,7 +27,7 @@
           line: 'rgba(29,29,31,0.10)',
         },
         fontFamily: {
-          sans: ['Inter', 'ui-sans-serif', 'system-ui'],
+          sans: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Display"', '"SF Pro Text"', 'Inter', 'ui-sans-serif', 'system-ui', '"Helvetica Neue"', 'Arial', 'sans-serif'],
           mono: ['"IBM Plex Mono"', 'ui-monospace', 'monospace'],
         },
         borderRadius: {
@@ -58,8 +58,12 @@
   .reveal { opacity: 0; }
   .reveal.in { animation: fadeInUp 0.7s cubic-bezier(.16,.8,.24,1) forwards; }
 
+  @keyframes softDrift { 0% { transform: translate3d(0,0,0); } 50% { transform: translate3d(0,-6px,0); } 100% { transform: translate3d(0,0,0); } }
+  .drift { animation: softDrift 7s ease-in-out infinite; }
+
   @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
+    .drift { animation: none !important; }
     .reveal { opacity: 1 !important; animation: none !important; transform: none !important; }
   }
 
@@ -74,7 +78,7 @@
 <div id="root"></div>
 
 <script type="text/babel" data-presets="react">
-const { useState, useEffect, useRef, useMemo, useCallback, createContext, useContext } = React;
+const { useState, useEffect, useRef, useMemo, useCallback } = React;
 
 /* ============================== ICONS ============================== */
 const IconWrap = ({ children, size = 20, className = "", strokeWidth = 1.6 }) => (
@@ -139,7 +143,7 @@ const ROOMS = [
     view: "Courtyard view",
     blurb: "A tight, well-made box for the essentials — good light, a proper desk, and nothing you don't need.",
     features: ["Queen bed", "Rain shower", "Workdesk", "Air conditioning"],
-    image: "https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&w=1200&q=80",
+    image: "https://images.unsplash.com/photo-1591088398332-8a7791972843?auto=format&fit=crop&w=1200&q=80",
   },
   {
     id: "corner",
@@ -151,7 +155,7 @@ const ROOMS = [
     view: "Bole skyline view",
     blurb: "Two walls of glass and a separate sitting area, for guests who work from where they sleep.",
     features: ["King bed", "Sitting area", "Soaking tub", "Espresso bar"],
-    image: "https://images.unsplash.com/photo-1591088398332-8a7791972843?auto=format&fit=crop&w=1200&q=80",
+    image: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=1200&q=80",
   },
   {
     id: "loft",
@@ -163,7 +167,7 @@ const ROOMS = [
     view: "Double-height, garden view",
     blurb: "A mezzanine sleeping level over an open living floor. Built for a longer stay.",
     features: ["Mezzanine bed", "Full kitchenette", "Private balcony", "Record player"],
-    image: "https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&w=1200&q=80",
+    image: "https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?auto=format&fit=crop&w=1200&q=80",
   },
   {
     id: "penthouse",
@@ -230,15 +234,17 @@ const DINING = [
 ];
 
 const NEIGHBORHOOD = [
-  { id: "unity-park", name: "Unity Park", category: "Parks & Green Space", icon: LeafIcon, walk: "14 min walk", blurb: "Palace grounds turned public gardens — the closest thing the city has to a formal park, with a small zoo and a cable-car view point." },
-  { id: "friendship-park", name: "Friendship Park", category: "Parks & Green Space", icon: LeafIcon, walk: "9 min walk", blurb: "River-front paths and fountains along the Kebena — quiet in the morning, full of families by early evening." },
-  { id: "yared-roasters", name: "Yared Coffee Roasters", category: "Coffee & Roasters", icon: CoffeeIcon, walk: "4 min walk", blurb: "Single-origin Yirgacheffe and Guji lots, roasted on-site in small batches. Ask for the cupping notes chalked up by the till." },
-  { id: "kuriftu-gallery", name: "Kuriftu Contemporary", category: "Culture & Art", icon: TicketIcon, walk: "11 min walk", blurb: "A converted warehouse showing Ethiopian and East African contemporary artists, with a rotating show roughly every six weeks." },
-  { id: "edna-cinema", name: "Edna Mall Cinema", category: "Culture & Art", icon: TicketIcon, walk: "16 min walk", blurb: "The city's most reliable first-run screens, with a late show most nights that suits jet lag better than a hotel room does." },
-  { id: "shola-market", name: "Markets & Shopping", category: "Markets & Shopping", icon: Building2Icon, walk: "7 min walk", blurb: "Produce, spice, and textile stalls a fraction of Merkato's size — easier to navigate for a first visit, and just as good for berbere." },
-  { id: "bole-craft", name: "Bole Craft Row", category: "Markets & Shopping", icon: Building2Icon, walk: "6 min walk", blurb: "A short street of leatherwork, silver, and basket weavers. Prices are fair; bargaining is still expected and enjoyed." },
-  { id: "entoto-lookout", name: "Entoto Hills Lookout", category: "Parks & Green Space", icon: MapPinIcon, walk: "20 min drive", blurb: "Eucalyptus forest and the best full view of Addis there is. We arrange a driver for sunrise — worth the early alarm." },
+  { id: "unity-park", name: "Unity Park", category: "Parks & Green Space", icon: LeafIcon, walk: "14 min walk", blurb: "Palace grounds turned public gardens — the closest thing the city has to a formal park, with a small zoo and a cable-car view point.", image: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?auto=format&fit=crop&w=1200&q=80" },
+  { id: "friendship-park", name: "Friendship Park", category: "Parks & Green Space", icon: LeafIcon, walk: "9 min walk", blurb: "River-front paths and fountains along the Kebena — quiet in the morning, full of families by early evening.", image: "https://images.unsplash.com/photo-1519331379826-f10be5486c6f?auto=format&fit=crop&w=1200&q=80" },
+  { id: "yared-roasters", name: "Yared Coffee Roasters", category: "Coffee & Roasters", icon: CoffeeIcon, walk: "4 min walk", blurb: "Single-origin Yirgacheffe and Guji lots, roasted on-site in small batches. Ask for the cupping notes chalked up by the till.", image: "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=1200&q=80" },
+  { id: "kuriftu-gallery", name: "Kuriftu Contemporary", category: "Culture & Art", icon: TicketIcon, walk: "11 min walk", blurb: "A converted warehouse showing Ethiopian and East African contemporary artists, with a rotating show roughly every six weeks.", image: "https://images.unsplash.com/photo-1536924940846-227afb31e2a5?auto=format&fit=crop&w=1200&q=80" },
+  { id: "edna-cinema", name: "Edna Mall Cinema", category: "Culture & Art", icon: TicketIcon, walk: "16 min walk", blurb: "The city's most reliable first-run screens, with a late show most nights that suits jet lag better than a hotel room does.", image: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1200&q=80" },
+  { id: "shola-market", name: "Shola Market", category: "Markets & Shopping", icon: Building2Icon, walk: "7 min walk", blurb: "Produce, spice, and textile stalls a fraction of Merkato's size — easier to navigate for a first visit, and just as good for berbere.", image: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1200&q=80" },
+  { id: "bole-craft", name: "Bole Craft Row", category: "Markets & Shopping", icon: Building2Icon, walk: "6 min walk", blurb: "A short street of leatherwork, silver, and basket weavers. Prices are fair; bargaining is still expected and enjoyed.", image: "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=1200&q=80" },
+  { id: "entoto-lookout", name: "Entoto Hills Lookout", category: "Parks & Green Space", icon: MapPinIcon, walk: "20 min drive", blurb: "Eucalyptus forest and the best full view of Addis there is. We arrange a driver for sunrise — worth the early alarm.", image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80" },
 ];
+
+const LOBBY_IMAGE = "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80";
 
 const NEIGHBORHOOD_CATEGORIES = ["All", "Coffee & Roasters", "Culture & Art", "Parks & Green Space", "Markets & Shopping"];
 
@@ -285,8 +291,8 @@ const STORY_TABS = [
 ];
 
 const BENTO = [
-  { id: "lounge", title: "The Lounge", desc: "Coffee by 7, cocktails by 7 — the ground floor doesn't have a bedtime.", icon: CoffeeIcon, span: "md:col-span-2 md:row-span-2", href: "#/dining", image: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=1200&q=80" },
-  { id: "rooms", title: "Design-Driven Rooms", desc: "Every room drawn from scratch for this building, not picked from a catalogue.", icon: BedIcon, span: "md:col-span-2", href: "#/rooms", image: "https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=1200&q=80" },
+  { id: "lounge", title: "The Lounge", desc: "Coffee by 7, cocktails by 7 — the ground floor doesn't have a bedtime.", icon: CoffeeIcon, span: "md:col-span-2 md:row-span-2", href: "#/dining" },
+  { id: "rooms", title: "Design-Driven Rooms", desc: "Every room drawn from scratch for this building, not picked from a catalogue.", icon: BedIcon, span: "md:col-span-2", href: "#/rooms" },
   { id: "neighborhood", title: "Curated Neighborhood", desc: "A walking guide to Bole, kept current by the people at the front desk.", icon: MapPinIcon, span: "", href: "#/experience" },
   { id: "seamless", title: "Seamless Stay", desc: "Digital key, room controls, and checkout — all from your phone.", icon: KeyIcon, span: "", href: "#/experience" },
 ];
@@ -340,6 +346,21 @@ function nightsBetween(a, b) {
   return diff > 0 ? diff : 0;
 }
 function money(n) { return `$${n.toLocaleString("en-US")}`; }
+
+/* ============================== PHOTOGRAPHY ============================== */
+function Photo({ src, alt = "", className = "", rounded = "rounded-[28px]", overlay = false }) {
+  return (
+    <div className={`relative overflow-hidden ${rounded} ${className}`}>
+      <img src={src} alt={alt} loading="lazy" className="w-full h-full object-cover" />
+      {overlay && <div className="absolute inset-0 bg-gradient-to-t from-espresso/70 via-espresso/10 to-transparent" />}
+    </div>
+  );
+}
+const MOODS = {
+  morning: { label: "Morning", icon: SunIcon, image: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1800&q=80", caption: "Bright and quiet — coffee's just gone on at Mesob." },
+  golden:  { label: "Golden Hour", icon: SunsetIcon, image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1800&q=80", caption: "The Roof starts filling as the sky turns amber." },
+  night:   { label: "Night", icon: MoonIcon, image: "https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=1800&q=80", caption: "Long after the lobby's gone quiet, the facade's still lit." },
+};
 
 /* ============================== SHARED UI ============================== */
 function Badge({ children, className = "" }) {
@@ -479,9 +500,7 @@ function Footer() {
               <span className="text-[16.5px] font-semibold tracking-tight">Social House</span>
             </a>
             <p className="text-[14px] text-espresso2 max-w-xs leading-relaxed">A boutique hotel and social club in Bole, Addis Ababa. Rooms upstairs, the city's living room downstairs.</p>
-            <div className="mt-6 rounded-2xl overflow-hidden h-24 max-w-xs shadow-sm">
-              <img src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=600&q=80" alt="Social House Exterior at Night" className="w-full h-full object-cover" />
-            </div>
+            <div className="mt-6 rounded-2xl overflow-hidden h-24 max-w-xs"><Photo src={MOODS.night.image} alt="Social House at night" rounded="rounded-2xl" className="w-full h-full" /></div>
           </div>
           <div>
             <div className="text-[12px] font-mono tracking-wide text-espresso2 mb-4">EXPLORE</div>
@@ -560,40 +579,52 @@ function ReservationWidget({ booking, setBooking, onSearch, className = "" }) {
 
 /* ============================== HOME PAGE ============================== */
 function Hero({ booking, setBooking, onSearch }) {
+  const [mood, setMood] = useState("golden");
+  const m = MOODS[mood];
   return (
-    <section className="relative pt-14 sm:pt-20 pb-10">
+    <section className="relative pt-16 sm:pt-24 pb-10">
       <div className="max-w-[1400px] mx-auto px-5 sm:px-8">
-        <Reveal className="flex flex-wrap items-center gap-3 mb-7">
-          <Badge><MapPinIcon size={13} /> Bole, Addis Ababa</Badge>
-          <Badge><StarIcon size={13} /> 4.9 average, 1,240 stays</Badge>
-        </Reveal>
-        <div className="grid lg:grid-cols-[1.1fr_0.9fr] gap-10 lg:gap-16 items-end">
+        <div className="flex flex-col items-center text-center">
+          <Reveal className="flex flex-wrap items-center justify-center gap-3 mb-8">
+            <Badge><MapPinIcon size={13} /> Bole, Addis Ababa</Badge>
+            <Badge><StarIcon size={13} /> 4.9 average, 1,240 stays</Badge>
+          </Reveal>
           <Reveal delay={80}>
-            <h1 className="text-[42px] sm:text-[60px] lg:text-[72px] leading-[0.98] font-semibold tracking-tight">
+            <h1 className="text-[64px] sm:text-[92px] lg:text-[124px] leading-[0.94] font-semibold tracking-[-0.03em]">
               The city,<br />up close.
             </h1>
-            <p className="mt-6 text-[17px] sm:text-[19px] text-espresso2 max-w-lg leading-relaxed">
+          </Reveal>
+          <Reveal delay={140}>
+            <p className="mt-7 text-[18px] sm:text-[21px] text-espresso2 max-w-2xl leading-relaxed">
               A boutique hotel and social club in the heart of Bole — rooms built for staying, and a
               ground floor built for not wanting to leave it.
             </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <PrimaryButton href="#/rooms" size="lg">See Rooms & Suites</PrimaryButton>
-              <SecondaryButton href="#/dining" size="md">Explore Dining & Spaces</SecondaryButton>
-            </div>
           </Reveal>
-          <Reveal delay={160} className="w-full">
-            <div className="relative overflow-hidden rounded-[28px] shadow-[0_30px_80px_-30px_rgba(29,29,31,0.35)] aspect-[4/3]">
-              <img src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1200&q=80" alt="Social House Exterior Luxury Architecture" className="w-full h-full object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-t from-espresso/40 via-transparent to-transparent" />
-              <div className="absolute bottom-4 left-4 right-4 glass-dark rounded-full px-5 py-3 flex items-center justify-between text-cream text-[13.5px] border border-white/10">
-                <span className="font-medium">Bole Architecture & Interior</span>
-                <span className="font-mono text-xs opacity-80">Addis Ababa</span>
-              </div>
-            </div>
-            <p className="text-[12.5px] font-mono text-espresso2 mt-3 text-center lg:text-left">Social House facade and evening ambiance</p>
+          <Reveal delay={200} className="mt-9 flex flex-wrap justify-center gap-3">
+            <PrimaryButton href="#/rooms" size="lg">See Rooms & Suites</PrimaryButton>
+            <SecondaryButton href="#/dining" size="md">Explore Dining & Spaces</SecondaryButton>
           </Reveal>
         </div>
-        <Reveal delay={240} className="mt-12">
+
+        <Reveal delay={260} className="mt-16 max-w-3xl mx-auto">
+          <div className="relative">
+            <Photo src={m.image} alt={`Social House at ${m.label.toLowerCase()}`} className="w-full aspect-[16/9] shadow-[0_30px_80px_-30px_rgba(29,29,31,0.35)]" overlay />
+            <div className="absolute bottom-4 left-4 right-4 glass-dark rounded-full p-1 flex items-center gap-1 border border-white/10">
+              {Object.entries(MOODS).map(([key, val]) => {
+                const Icon = val.icon;
+                return (
+                  <button key={key} onClick={() => setMood(key)}
+                    className={`tap flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-full text-[12.5px] font-medium transition-colors ${mood === key ? "bg-cream text-espresso" : "text-cream/70 hover:text-cream"}`}>
+                    <Icon size={13} /> {val.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          <p className="text-[12.5px] font-mono text-espresso2 mt-3 text-center">{m.caption}</p>
+        </Reveal>
+
+        <Reveal delay={320} className="mt-12">
           <ReservationWidget booking={booking} setBooking={setBooking} onSearch={onSearch} />
         </Reveal>
       </div>
@@ -613,17 +644,11 @@ function BentoGrid() {
           const Icon = b.icon;
           return (
             <Reveal key={b.id} delay={i * 90} className={b.span}>
-              <a href={b.href} className="group relative overflow-hidden block h-full min-h-[260px] rounded-[28px] border border-line bg-cream2 transition-all duration-500 p-7 flex flex-col justify-between">
-                {b.image && (
-                  <div className="absolute inset-0 z-0">
-                    <img src={b.image} alt={b.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-25" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-cream2 via-cream2/80 to-transparent" />
-                  </div>
-                )}
-                <div className="relative z-10 w-11 h-11 rounded-full bg-white border border-line flex items-center justify-center group-hover:border-brass/50 transition-colors shadow-sm">
+              <a href={b.href} className="group block h-full min-h-[220px] rounded-[28px] border border-line bg-cream2 hover:bg-white transition-colors duration-500 p-7 flex flex-col justify-between">
+                <div className="w-11 h-11 rounded-full bg-white border border-line flex items-center justify-center group-hover:border-brass/50 transition-colors">
                   <Icon size={19} className="text-espresso" />
                 </div>
-                <div className="relative z-10">
+                <div>
                   <h3 className="text-[19px] font-semibold tracking-tight mb-2 flex items-center gap-1.5">
                     {b.title}
                     <ChevronRight size={16} className="opacity-0 group-hover:opacity-100 -translate-x-1 group-hover:translate-x-0 transition-all duration-300" />
@@ -675,7 +700,7 @@ function TabbedStory() {
           </div>
           <div key={tab.id + "-visual"} className="reveal in">
             <div className="rounded-[28px] border border-white/10 bg-white/[0.04] p-6 sm:p-8">
-              <div className="rounded-2xl bg-espresso border border-white/10 overflow-hidden shadow-2xl">
+              <div className="rounded-2xl bg-espresso border border-white/10 overflow-hidden">
                 <div className="flex items-center gap-1.5 px-4 py-3 border-b border-white/10">
                   <span className="w-2.5 h-2.5 rounded-full bg-white/15" />
                   <span className="w-2.5 h-2.5 rounded-full bg-white/15" />
@@ -733,11 +758,8 @@ function CTASection({ onBook }) {
   return (
     <section className="max-w-[1400px] mx-auto px-5 sm:px-8 pb-24">
       <Reveal className="relative rounded-[32px] overflow-hidden border border-line">
-        <div className="absolute inset-0">
-          <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1600&q=80" alt="Luxury Hotel Resort Ambiance" className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-espresso/60 backdrop-blur-[2px]" />
-        </div>
-        <div className="relative px-8 py-16 sm:py-20 sm:px-16 text-center">
+        <Photo src={MOODS.night.image} alt="Social House at night" rounded="rounded-[32px]" className="absolute inset-0 w-full h-full" />
+        <div className="relative px-8 py-16 sm:py-20 sm:px-16 text-center bg-espresso/40">
           <h2 className="text-[30px] sm:text-[42px] font-semibold tracking-tight text-cream max-w-xl mx-auto">Ready when you are.</h2>
           <p className="text-cream/70 mt-4 max-w-md mx-auto">Rooms from $180 a night. Check availability in under a minute.</p>
           <div className="mt-8 flex justify-center">
@@ -766,9 +788,9 @@ function RoomCard({ room, onExplore, delay }) {
   return (
     <Reveal delay={delay}>
       <div className="group rounded-[28px] border border-line bg-cream2/60 overflow-hidden hover:shadow-[0_25px_60px_-25px_rgba(29,29,31,0.25)] transition-all duration-500">
-        <div className="overflow-hidden aspect-[5/4] relative">
-          <img src={room.image} alt={room.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-          <div className="absolute inset-0 bg-gradient-to-t from-espresso/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+        <div className="overflow-hidden">
+          <Photo src={room.image} alt={room.name} rounded="rounded-none"
+            className="aspect-[5/4] transition-transform duration-700 group-hover:scale-[1.06]" />
         </div>
         <div className="p-6">
           <div className="flex items-start justify-between gap-3">
@@ -801,10 +823,7 @@ function RoomDetailModal({ room, onClose, onBookRoom }) {
     <Modal open={!!room} onClose={onClose} wide>
       {room && (
         <div>
-          <div className="relative aspect-[16/9] w-full overflow-hidden rounded-t-[28px]">
-            <img src={room.image} alt={room.name} className="w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-t from-espresso/40 via-transparent to-transparent" />
-          </div>
+          <Photo src={room.image} alt={room.name} rounded="rounded-t-[28px] sm:rounded-t-[28px]" className="aspect-[16/9]" />
           <div className="p-7 sm:p-10">
             <div className="flex items-start justify-between gap-4 flex-wrap">
               <div>
@@ -925,9 +944,7 @@ function DiningBlock({ venue, index }) {
   return (
     <Reveal className={`grid lg:grid-cols-2 gap-10 lg:gap-16 items-center py-16 sm:py-20 border-b border-line last:border-none`}>
       <div className={reverse ? "lg:order-2" : ""}>
-        <div className="overflow-hidden rounded-[28px] aspect-[4/3] shadow-md">
-          <img src={venue.image} alt={venue.name} className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" />
-        </div>
+        <Photo src={venue.image} alt={venue.name} className="aspect-[4/3]" />
       </div>
       <div className={reverse ? "lg:order-1" : ""}>
         <div className="w-11 h-11 rounded-full bg-cream2 border border-line flex items-center justify-center mb-5"><Icon size={19} /></div>
@@ -995,10 +1012,7 @@ function NeighborhoodMap({ items, active, onSelect }) {
     "bole-craft": [38, 72], "entoto-lookout": [15, 12],
   };
   return (
-    <div className="relative rounded-[28px] border border-line bg-cream2 overflow-hidden aspect-square shadow-sm">
-      <div className="absolute inset-0">
-        <img src="https://images.unsplash.com/photo-1524813686514-a57563d77840?auto=format&fit=crop&w=1000&q=80" alt="City Map Background" className="w-full h-full object-cover opacity-20" />
-      </div>
+    <div className="relative rounded-[28px] border border-line bg-cream2 overflow-hidden aspect-square">
       <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full opacity-[0.35]">
         <path d="M0 30 Q 30 20 50 35 T 100 25" stroke="#5C6B57" strokeWidth="0.6" fill="none" />
         <path d="M10 0 L 15 100" stroke="#1D1D1F" strokeWidth="0.3" fill="none" opacity="0.3" />
@@ -1008,7 +1022,7 @@ function NeighborhoodMap({ items, active, onSelect }) {
       </svg>
       <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
         <span className="w-3.5 h-3.5 rounded-full bg-espresso border-2 border-cream shadow" />
-        <span className="text-[10px] font-mono mt-1 bg-cream/90 px-1.5 py-0.5 rounded shadow">Social House</span>
+        <span className="text-[10px] font-mono mt-1 bg-cream/90 px-1.5 py-0.5 rounded">Social House</span>
       </div>
       {items.map(item => {
         const [x, y] = positions[item.id] || [50, 50];
@@ -1102,9 +1116,7 @@ function ContactPage() {
           )}
         </Reveal>
         <Reveal delay={140}>
-          <div className="rounded-[28px] overflow-hidden aspect-[4/3] mb-6 shadow-sm">
-            <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1000&q=80" alt="Bole Addis Ababa Street View" className="w-full h-full object-cover" />
-          </div>
+          <Photo src={LOBBY_IMAGE} alt="Social House front desk" className="aspect-[4/3] mb-6" />
           <ul className="space-y-3 text-[14.5px] text-espresso2">
             <li className="flex items-center gap-3"><MapPinIcon size={16} /> Cameroon Street, Bole, Addis Ababa</li>
             <li className="flex items-center gap-3"><PhoneIcon size={16} /> +251 911 234 567</li>
@@ -1236,9 +1248,7 @@ function BookingPage({ booking, setBooking, initialStep }) {
                 {ROOMS.map(r => (
                   <button key={r.id} onClick={() => setBooking(b => ({ ...b, selectedRoomId: r.id }))}
                     className={`w-full text-left flex items-center gap-4 p-4 rounded-2xl border transition-all duration-300 ${booking.selectedRoomId === r.id ? "border-brass bg-white shadow-sm" : "border-line bg-white/50 hover:border-espresso/25"}`}>
-                    <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0">
-                      <img src={r.image} alt={r.name} className="w-full h-full object-cover" />
-                    </div>
+                    <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0"><Photo src={r.image} alt={r.name} rounded="rounded-xl" className="w-full h-full" /></div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-2">
                         <span className="font-semibold text-[15px] truncate">{r.name}</span>
@@ -1335,13 +1345,11 @@ function BookingPage({ booking, setBooking, initialStep }) {
           )}
         </Reveal>
 
-        <Reveal delay={140} className="rounded-[28px] border border-line bg-white p-6 h-fit lg:sticky lg:top-24 shadow-sm">
+        <Reveal delay={140} className="rounded-[28px] border border-line bg-white p-6 h-fit lg:sticky lg:top-24">
           <h3 className="text-[13px] font-mono tracking-wide text-espresso2 mb-4">SUMMARY</h3>
           {room ? (
             <div className="flex items-center gap-3 pb-4 border-b border-line mb-4">
-              <div className="w-12 h-12 rounded-lg overflow-hidden shrink-0">
-                <img src={room.image} alt={room.name} className="w-full h-full object-cover" />
-              </div>
+              <div className="w-12 h-12 rounded-lg overflow-hidden shrink-0"><Photo src={room.image} alt={room.name} rounded="rounded-lg" className="w-full h-full" /></div>
               <div className="min-w-0">
                 <div className="text-[14px] font-medium truncate">{room.name}</div>
                 <div className="text-[12px] text-espresso2">{nights} night{nights > 1 ? "s" : ""} · {booking.guests} guests</div>
