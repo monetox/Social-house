@@ -24,7 +24,7 @@
           brass: '#A67C52',
           brassDeep: '#8B6740',
           sage: '#5C6B57',
-          line: 'rgba(29,29,31,0.10)',
+          line: 'rgba(29,29,31,0.08)',
         },
         fontFamily: {
           sans: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Display"', '"SF Pro Text"', 'Inter', 'ui-sans-serif', 'system-ui', '"Helvetica Neue"', 'Arial', 'sans-serif'],
@@ -67,10 +67,32 @@
     .reveal { opacity: 1 !important; animation: none !important; transform: none !important; }
   }
 
-  .glass { background: rgba(255,255,255,0.6); backdrop-filter: blur(18px) saturate(160%); -webkit-backdrop-filter: blur(18px) saturate(160%); }
-  .glass-dark { background: rgba(29,29,31,0.72); backdrop-filter: blur(18px) saturate(140%); -webkit-backdrop-filter: blur(18px) saturate(140%); }
+  /* Apple-Inspired Glassmorphism Classes */
+  .apple-glass-light {
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.04);
+  }
 
-  .tap { transition: transform 0.35s cubic-bezier(.16,.8,.24,1), opacity 0.35s; }
+  .apple-glass-dark {
+    background: rgba(29, 29, 31, 0.72);
+    backdrop-filter: blur(24px) saturate(160%);
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.25);
+  }
+
+  .apple-glass-card {
+    background: rgba(255, 255, 255, 0.45);
+    backdrop-filter: blur(16px) saturate(150%);
+    -webkit-backdrop-filter: blur(16px) saturate(150%);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.03), inset 0 1px 0 0 rgba(255, 255, 255, 0.8);
+  }
+
+  .tap { transition: transform 0.35s cubic-bezier(.16,.8,.24,1), opacity 0.35s, background-color 0.3s; }
   .tap:active { transform: scale(0.97); }
 </style>
 </head>
@@ -365,7 +387,7 @@ const MOODS = {
 /* ============================== SHARED UI ============================== */
 function Badge({ children, className = "" }) {
   return (
-    <span className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[12.5px] font-mono tracking-wide border border-line bg-white/60 text-espresso2 ${className}`}>
+    <span className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[12.5px] font-mono tracking-wide apple-glass-light text-espresso2 shadow-sm ${className}`}>
       {children}
     </span>
   );
@@ -374,7 +396,7 @@ function Badge({ children, className = "" }) {
 function PrimaryButton({ children, onClick, href, className = "", size = "md", icon: Icon = ArrowRight }) {
   const sizes = { sm: "px-4 py-2 text-[13px]", md: "px-5 py-3 text-[14.5px]", lg: "px-7 py-4 text-[15.5px]" };
   const content = (
-    <span className={`tap inline-flex items-center justify-center gap-2 rounded-full bg-espresso text-cream font-medium hover:bg-black transition-colors duration-300 ${sizes[size]} ${className}`}>
+    <span className={`tap inline-flex items-center justify-center gap-2 rounded-full bg-espresso text-cream font-medium hover:bg-black transition-all duration-300 shadow-md hover:shadow-lg ${sizes[size]} ${className}`}>
       {children}
       {Icon && <Icon size={16} strokeWidth={2} />}
     </span>
@@ -386,7 +408,7 @@ function PrimaryButton({ children, onClick, href, className = "", size = "md", i
 function SecondaryButton({ children, onClick, href, className = "", size = "md" }) {
   const sizes = { sm: "px-4 py-2 text-[13px]", md: "px-5 py-3 text-[14.5px]" };
   const content = (
-    <span className={`tap inline-flex items-center justify-center gap-2 rounded-full border border-espresso/20 text-espresso font-medium hover:border-espresso/50 hover:bg-espresso/[0.03] transition-all duration-300 ${sizes[size]} ${className}`}>
+    <span className={`tap inline-flex items-center justify-center gap-2 rounded-full apple-glass-light text-espresso font-medium hover:bg-white/80 transition-all duration-300 ${sizes[size]} ${className}`}>
       {children}
     </span>
   );
@@ -398,13 +420,13 @@ function Stepper({ value, onChange, min = 1, max = 10, label }) {
   return (
     <div className="flex items-center gap-3">
       <button type="button" onClick={() => onChange(Math.max(min, value - 1))}
-        className="tap w-8 h-8 rounded-full border border-espresso/20 flex items-center justify-center hover:border-espresso/50 disabled:opacity-30"
+        className="tap w-8 h-8 rounded-full apple-glass-light flex items-center justify-center hover:bg-white disabled:opacity-30"
         disabled={value <= min} aria-label={`Decrease ${label}`}>
         <MinusIcon size={14} />
       </button>
       <span className="w-6 text-center font-mono text-[14px] tabular-nums">{value}</span>
       <button type="button" onClick={() => onChange(Math.min(max, value + 1))}
-        className="tap w-8 h-8 rounded-full border border-espresso/20 flex items-center justify-center hover:border-espresso/50 disabled:opacity-30"
+        className="tap w-8 h-8 rounded-full apple-glass-light flex items-center justify-center hover:bg-white disabled:opacity-30"
         disabled={value >= max} aria-label={`Increase ${label}`}>
         <PlusIcon size={14} />
       </button>
@@ -423,9 +445,9 @@ function Modal({ open, onClose, children, wide = false }) {
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-6">
-      <div className="absolute inset-0 bg-espresso/50 backdrop-blur-sm" onClick={onClose} />
-      <div className={`relative bg-cream w-full ${wide ? "sm:max-w-3xl" : "sm:max-w-lg"} max-h-[92vh] overflow-y-auto rounded-t-[28px] sm:rounded-[28px] border border-line shadow-2xl animate-[fadeInUp_0.35s_ease]`}>
-        <button onClick={onClose} className="tap absolute top-5 right-5 w-9 h-9 rounded-full bg-white/80 border border-line flex items-center justify-center hover:bg-white z-10" aria-label="Close">
+      <div className="absolute inset-0 bg-espresso/40 backdrop-blur-md transition-opacity duration-300" onClick={onClose} />
+      <div className={`relative apple-glass-light w-full ${wide ? "sm:max-w-3xl" : "sm:max-w-lg"} max-h-[92vh] overflow-y-auto rounded-t-[28px] sm:rounded-[28px] shadow-2xl border border-white/60 animate-[fadeInUp_0.35s_cubic-bezier(.16,.8,.24,1)] z-10`}>
+        <button onClick={onClose} className="tap absolute top-5 right-5 w-9 h-9 rounded-full apple-glass-light border border-white/80 flex items-center justify-center hover:bg-white z-10 shadow-sm" aria-label="Close">
           <XIcon size={16} />
         </button>
         {children}
@@ -445,10 +467,10 @@ function Header({ route, onBook }) {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
   return (
-    <header className={`sticky top-0 z-50 transition-all duration-500 ${scrolled ? "glass border-b border-line" : "bg-transparent"}`}>
+    <header className={`sticky top-0 z-50 transition-all duration-500 ${scrolled ? "apple-glass-light border-b border-white/40 shadow-sm" : "bg-transparent"}`}>
       <div className="max-w-[1400px] mx-auto px-5 sm:px-8 h-[72px] flex items-center justify-between">
         <a href="#/" className="flex items-center gap-2.5 group">
-          <span className="w-8 h-8 rounded-full bg-espresso flex items-center justify-center text-cream text-[13px] font-semibold tracking-tight">SH</span>
+          <span className="w-8 h-8 rounded-full bg-espresso flex items-center justify-center text-cream text-[13px] font-semibold tracking-tight shadow-sm">SH</span>
           <span className="text-[16.5px] font-semibold tracking-tight">Social House</span>
         </a>
         <nav className="hidden md:flex items-center gap-9">
@@ -468,7 +490,7 @@ function Header({ route, onBook }) {
       </div>
       {open && (
         <div className="fixed inset-0 z-[110] md:hidden">
-          <div className="absolute inset-0 bg-cream flex flex-col">
+          <div className="absolute inset-0 apple-glass-light backdrop-blur-2xl flex flex-col">
             <div className="flex items-center justify-between px-5 h-[72px] border-b border-line">
               <span className="text-[16.5px] font-semibold">Social House</span>
               <button onClick={() => setOpen(false)} className="w-10 h-10 flex items-center justify-center" aria-label="Close menu"><XIcon size={22} /></button>
@@ -521,8 +543,8 @@ function Footer() {
             <div className="text-[12px] font-mono tracking-wide text-espresso2 mb-4">STAY IN TOUCH</div>
             <form onSubmit={(e) => e.preventDefault()} className="flex items-center gap-2">
               <input type="email" required placeholder="Email address"
-                className="flex-1 min-w-0 px-3.5 py-2.5 rounded-full border border-line bg-white/70 text-[13px] focus:outline-none focus:border-espresso/40" />
-              <button className="tap w-10 h-10 shrink-0 rounded-full bg-espresso text-cream flex items-center justify-center"><ArrowRight size={15} /></button>
+                className="flex-1 min-w-0 px-3.5 py-2.5 rounded-full apple-glass-light text-[13px] focus:outline-none focus:border-espresso/40 border border-white/60 shadow-inner" />
+              <button className="tap w-10 h-10 shrink-0 rounded-full bg-espresso text-cream flex items-center justify-center shadow-md"><ArrowRight size={15} /></button>
             </form>
             <div className="flex items-center gap-3 mt-5 text-espresso2">
               <a href="#" className="hover:text-espresso transition-colors" aria-label="Instagram"><InstagramIcon size={19} /></a>
@@ -541,8 +563,8 @@ function Footer() {
 /* ============================== RESERVATION WIDGET ============================== */
 function ReservationWidget({ booking, setBooking, onSearch, className = "" }) {
   return (
-    <div className={`glass border border-line rounded-[26px] sm:rounded-full shadow-[0_20px_60px_-20px_rgba(29,29,31,0.25)] p-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-1 ${className}`}>
-      <label className="flex-1 flex items-center gap-3 px-4 py-3 rounded-full hover:bg-white/50 transition-colors cursor-pointer">
+    <div className={`apple-glass-light rounded-[26px] sm:rounded-full p-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-1 shadow-[0_20px_50px_-15px_rgba(0,0,0,0.08)] ${className}`}>
+      <label className="flex-1 flex items-center gap-3 px-4 py-3 rounded-full hover:bg-white/40 transition-colors cursor-pointer">
         <CalendarIcon size={17} className="text-espresso2 shrink-0" />
         <span className="flex flex-col text-left w-full">
           <span className="text-[10.5px] font-mono tracking-wide text-espresso2">CHECK-IN</span>
@@ -552,7 +574,7 @@ function ReservationWidget({ booking, setBooking, onSearch, className = "" }) {
         </span>
       </label>
       <div className="hidden sm:block w-px h-8 bg-line" />
-      <label className="flex-1 flex items-center gap-3 px-4 py-3 rounded-full hover:bg-white/50 transition-colors cursor-pointer">
+      <label className="flex-1 flex items-center gap-3 px-4 py-3 rounded-full hover:bg-white/40 transition-colors cursor-pointer">
         <CalendarIcon size={17} className="text-espresso2 shrink-0" />
         <span className="flex flex-col text-left w-full">
           <span className="text-[10.5px] font-mono tracking-wide text-espresso2">CHECK-OUT</span>
@@ -570,7 +592,7 @@ function ReservationWidget({ booking, setBooking, onSearch, className = "" }) {
         <Stepper value={booking.guests} onChange={(v) => setBooking(b => ({ ...b, guests: v }))} min={1} max={8} label="guests" />
       </div>
       <button onClick={onSearch}
-        className="tap shrink-0 m-1 sm:m-0 flex items-center justify-center gap-2 rounded-full bg-espresso text-cream px-6 py-3.5 font-medium text-[14.5px] hover:bg-black transition-colors">
+        className="tap shrink-0 m-1 sm:m-0 flex items-center justify-center gap-2 rounded-full bg-espresso text-cream px-6 py-3.5 font-medium text-[14.5px] hover:bg-black transition-colors shadow-md">
         <SearchIcon size={16} /> Check availability
       </button>
     </div>
@@ -609,12 +631,12 @@ function Hero({ booking, setBooking, onSearch }) {
         <Reveal delay={260} className="mt-16 max-w-3xl mx-auto">
           <div className="relative">
             <Photo src={m.image} alt={`Social House at ${m.label.toLowerCase()}`} className="w-full aspect-[16/9] shadow-[0_30px_80px_-30px_rgba(29,29,31,0.35)]" overlay />
-            <div className="absolute bottom-4 left-4 right-4 glass-dark rounded-full p-1 flex items-center gap-1 border border-white/10">
+            <div className="absolute bottom-4 left-4 right-4 apple-glass-dark rounded-full p-1.5 flex items-center gap-1 border border-white/20">
               {Object.entries(MOODS).map(([key, val]) => {
                 const Icon = val.icon;
                 return (
                   <button key={key} onClick={() => setMood(key)}
-                    className={`tap flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-full text-[12.5px] font-medium transition-colors ${mood === key ? "bg-cream text-espresso" : "text-cream/70 hover:text-cream"}`}>
+                    className={`tap flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-full text-[12.5px] font-medium transition-all duration-300 ${mood === key ? "bg-white text-espresso shadow-md" : "text-cream/80 hover:text-cream"}`}>
                     <Icon size={13} /> {val.label}
                   </button>
                 );
@@ -644,7 +666,7 @@ function BentoGrid() {
           const Icon = b.icon;
           return (
             <Reveal key={b.id} delay={i * 90} className={b.span}>
-              <a href={b.href} className="group relative block h-full min-h-[260px] rounded-[28px] border border-line bg-cream2 overflow-hidden transition-all duration-500 p-7 flex flex-col justify-between shadow-sm hover:shadow-xl">
+              <a href={b.href} className="group relative block h-full min-h-[260px] rounded-[28px] apple-glass-card overflow-hidden transition-all duration-500 p-7 flex flex-col justify-between shadow-sm hover:shadow-2xl">
                 {b.image && (
                   <div className="absolute inset-0 z-0 overflow-hidden">
                     <img 
@@ -655,7 +677,7 @@ function BentoGrid() {
                     <div className="absolute inset-0 bg-gradient-to-t from-espresso/90 via-espresso/40 to-espresso/20 group-hover:via-espresso/30 transition-colors duration-500" />
                   </div>
                 )}
-                <div className="relative z-10 w-11 h-11 rounded-full bg-white/90 backdrop-blur-md border border-line flex items-center justify-center group-hover:border-brass/50 transition-colors">
+                <div className="relative z-10 w-11 h-11 rounded-full apple-glass-light border border-white/60 flex items-center justify-center group-hover:border-brass/50 transition-colors shadow-sm">
                   <Icon size={19} className="text-espresso" />
                 </div>
                 <div className="relative z-10">
@@ -689,7 +711,7 @@ function TabbedStory() {
             const Icon = t.icon;
             return (
               <button key={t.id} onClick={() => setActive(t.id)}
-                className={`tap flex items-center gap-2 px-4 py-2.5 rounded-full text-[13.5px] font-medium transition-colors duration-300 ${active === t.id ? "bg-white/10 text-cream" : "text-cream/50 hover:text-cream/80"}`}>
+                className={`tap flex items-center gap-2 px-4 py-2.5 rounded-full text-[13.5px] font-medium transition-all duration-300 ${active === t.id ? "apple-glass-dark text-cream border-white/20" : "text-cream/50 hover:text-cream/80"}`}>
                 <Icon size={15} /> {t.label}
               </button>
             );
@@ -702,15 +724,15 @@ function TabbedStory() {
             <ul className="space-y-3">
               {tab.points.map((p, i) => (
                 <li key={i} className="flex items-start gap-3 text-[14.5px] text-cream/85">
-                  <span className="mt-1 w-4 h-4 rounded-full bg-brass/90 flex items-center justify-center shrink-0"><CheckIcon size={10} strokeWidth={2.5} /></span>
+                  <span className="mt-1 w-4 h-4 rounded-full bg-brass/90 flex items-center justify-center shrink-0 shadow-sm"><CheckIcon size={10} strokeWidth={2.5} /></span>
                   {p}
                 </li>
               ))}
             </ul>
           </div>
           <div key={tab.id + "-visual"} className="reveal in">
-            <div className="rounded-[28px] border border-white/10 bg-white/[0.04] p-6 sm:p-8">
-              <div className="rounded-2xl bg-espresso border border-white/10 overflow-hidden">
+            <div className="rounded-[28px] border border-white/10 apple-glass-dark p-6 sm:p-8">
+              <div className="rounded-2xl bg-espresso border border-white/10 overflow-hidden shadow-2xl">
                 <div className="flex items-center gap-1.5 px-4 py-3 border-b border-white/10">
                   <span className="w-2.5 h-2.5 rounded-full bg-white/15" />
                   <span className="w-2.5 h-2.5 rounded-full bg-white/15" />
@@ -731,7 +753,7 @@ function TabbedStory() {
                     </div>
                   ))}
                   <div className="flex justify-end pt-1">
-                    <span className="px-4 py-2 rounded-full bg-brass text-espresso text-[12.5px] font-medium">Confirm</span>
+                    <span className="px-4 py-2 rounded-full bg-brass text-espresso text-[12.5px] font-medium shadow-sm">Confirm</span>
                   </div>
                 </div>
               </div>
@@ -767,13 +789,13 @@ function StatsStrip() {
 function CTASection({ onBook }) {
   return (
     <section className="max-w-[1400px] mx-auto px-5 sm:px-8 pb-24">
-      <Reveal className="relative rounded-[32px] overflow-hidden border border-line">
+      <Reveal className="relative rounded-[32px] overflow-hidden border border-line shadow-2xl">
         <Photo src={MOODS.night.image} alt="Social House at night" rounded="rounded-[32px]" className="absolute inset-0 w-full h-full" />
-        <div className="relative px-8 py-16 sm:py-20 sm:px-16 text-center bg-espresso/40">
+        <div className="relative px-8 py-16 sm:py-20 sm:px-16 text-center bg-espresso/40 backdrop-blur-xs">
           <h2 className="text-[30px] sm:text-[42px] font-semibold tracking-tight text-cream max-w-xl mx-auto">Ready when you are.</h2>
           <p className="text-cream/70 mt-4 max-w-md mx-auto">Rooms from $180 a night. Check availability in under a minute.</p>
           <div className="mt-8 flex justify-center">
-            <PrimaryButton onClick={onBook} size="lg" className="!bg-cream !text-espresso hover:!bg-white">Book Now</PrimaryButton>
+            <PrimaryButton onClick={onBook} size="lg" className="!bg-cream !text-espresso hover:!bg-white shadow-lg">Book Now</PrimaryButton>
           </div>
         </div>
       </Reveal>
@@ -797,7 +819,7 @@ function HomePage({ booking, setBooking, onSearch, onBook }) {
 function RoomCard({ room, onExplore, delay }) {
   return (
     <Reveal delay={delay}>
-      <div className="group rounded-[28px] border border-line bg-cream2/60 overflow-hidden hover:shadow-[0_25px_60px_-25px_rgba(29,29,31,0.25)] transition-all duration-500">
+      <div className="group rounded-[28px] apple-glass-card overflow-hidden hover:shadow-[0_25px_60px_-25px_rgba(29,29,31,0.25)] transition-all duration-500">
         <div className="overflow-hidden">
           <Photo src={room.image} alt={room.name} rounded="rounded-none"
             className="aspect-[5/4] transition-transform duration-700 group-hover:scale-[1.06]" />
@@ -888,7 +910,7 @@ function RoomsPage({ onBookRoom }) {
         <Reveal delay={100} className="flex gap-2 mt-9 flex-wrap">
           {ROOM_FILTERS.map(f => (
             <button key={f} onClick={() => setFilter(f)}
-              className={`tap px-5 py-2.5 rounded-full text-[13.5px] font-medium border transition-colors duration-300 ${filter === f ? "bg-espresso text-cream border-espresso" : "border-line text-espresso2 hover:border-espresso/40"}`}>
+              className={`tap px-5 py-2.5 rounded-full text-[13.5px] font-medium border transition-all duration-300 ${filter === f ? "bg-espresso text-cream border-espresso shadow-sm" : "apple-glass-light text-espresso2 border-white/60 hover:border-espresso/40"}`}>
               {f}
             </button>
           ))}
@@ -917,27 +939,27 @@ function ReserveTableModal({ venue, onClose }) {
           <div className="grid grid-cols-2 gap-3">
             <label className="block">
               <span className="text-[11.5px] font-mono text-espresso2">DATE</span>
-              <input required type="date" className="mt-1 w-full px-3.5 py-2.5 rounded-xl border border-line bg-white/70 text-[14px] focus:outline-none focus:border-espresso/40" />
+              <input required type="date" className="mt-1 w-full px-3.5 py-2.5 rounded-xl border border-white/60 apple-glass-light text-[14px] focus:outline-none focus:border-espresso/40" />
             </label>
             <label className="block">
               <span className="text-[11.5px] font-mono text-espresso2">TIME</span>
-              <input required type="time" className="mt-1 w-full px-3.5 py-2.5 rounded-xl border border-line bg-white/70 text-[14px] focus:outline-none focus:border-espresso/40" />
+              <input required type="time" className="mt-1 w-full px-3.5 py-2.5 rounded-xl border border-white/60 apple-glass-light text-[14px] focus:outline-none focus:border-espresso/40" />
             </label>
           </div>
           <label className="block mt-3">
             <span className="text-[11.5px] font-mono text-espresso2">PARTY SIZE</span>
-            <input required type="number" min="1" max="20" defaultValue="2" className="mt-1 w-full px-3.5 py-2.5 rounded-xl border border-line bg-white/70 text-[14px] focus:outline-none focus:border-espresso/40" />
+            <input required type="number" min="1" max="20" defaultValue="2" className="mt-1 w-full px-3.5 py-2.5 rounded-xl border border-white/60 apple-glass-light text-[14px] focus:outline-none focus:border-espresso/40" />
           </label>
           <label className="block mt-3">
             <span className="text-[11.5px] font-mono text-espresso2">NAME</span>
-            <input required type="text" placeholder="Full name" className="mt-1 w-full px-3.5 py-2.5 rounded-xl border border-line bg-white/70 text-[14px] focus:outline-none focus:border-espresso/40" />
+            <input required type="text" placeholder="Full name" className="mt-1 w-full px-3.5 py-2.5 rounded-xl border border-white/60 apple-glass-light text-[14px] focus:outline-none focus:border-espresso/40" />
           </label>
           <PrimaryButton className="w-full mt-6">Confirm Reservation</PrimaryButton>
         </form>
       )}
       {venue && done && (
         <div className="p-9 text-center">
-          <div className="w-14 h-14 rounded-full bg-sage/15 text-sage flex items-center justify-center mx-auto mb-5"><CheckIcon size={24} /></div>
+          <div className="w-14 h-14 rounded-full bg-sage/15 text-sage flex items-center justify-center mx-auto mb-5 shadow-sm"><CheckIcon size={24} /></div>
           <h3 className="text-[22px] font-semibold tracking-tight">Table held.</h3>
           <p className="text-[14.5px] text-espresso2 mt-2">We've reserved your table at {venue.name}. A confirmation is on its way to your email.</p>
           <SecondaryButton onClick={() => { onClose(); setTimeout(() => setDone(false), 300); }} className="mt-7">Close</SecondaryButton>
@@ -954,10 +976,10 @@ function DiningBlock({ venue, index }) {
   return (
     <Reveal className={`grid lg:grid-cols-2 gap-10 lg:gap-16 items-center py-16 sm:py-20 border-b border-line last:border-none`}>
       <div className={reverse ? "lg:order-2" : ""}>
-        <Photo src={venue.image} alt={venue.name} className="aspect-[4/3]" />
+        <Photo src={venue.image} alt={venue.name} className="aspect-[4/3] shadow-md" />
       </div>
       <div className={reverse ? "lg:order-1" : ""}>
-        <div className="w-11 h-11 rounded-full bg-cream2 border border-line flex items-center justify-center mb-5"><Icon size={19} /></div>
+        <div className="w-11 h-11 rounded-full apple-glass-light border border-white/60 flex items-center justify-center mb-5 shadow-sm"><Icon size={19} /></div>
         <span className="text-[12px] font-mono tracking-wide text-espresso2">{venue.kicker.toUpperCase()}</span>
         <h3 className="text-[28px] sm:text-[34px] font-semibold tracking-tight mt-2">{venue.name}</h3>
         <p className="text-[15px] text-espresso2 leading-relaxed mt-4">{venue.blurb}</p>
@@ -970,13 +992,13 @@ function DiningBlock({ venue, index }) {
         </div>
         <div className="mt-7 flex flex-wrap gap-3">
           <button onClick={() => setShowMenu(s => !s)}
-            className="tap inline-flex items-center gap-2 px-5 py-3 rounded-full border border-espresso/15 text-[14px] font-medium hover:border-espresso/40 transition-colors">
+            className="tap inline-flex items-center gap-2 px-5 py-3 rounded-full apple-glass-light border border-white/60 text-[14px] font-medium hover:bg-white transition-all">
             {showMenu ? "Hide Menu" : "View Menu"} <ChevronDown size={15} className={`transition-transform duration-300 ${showMenu ? "rotate-180" : ""}`} />
           </button>
           <PrimaryButton onClick={() => window.dispatchEvent(new CustomEvent("reserve-table", { detail: venue }))} size="md">Reserve a Table</PrimaryButton>
         </div>
         {showMenu && (
-          <div className="mt-5 rounded-2xl border border-line bg-cream2/70 p-5 space-y-3 reveal in">
+          <div className="mt-5 rounded-2xl apple-glass-card p-5 space-y-3 reveal in border border-white/60 shadow-sm">
             {venue.menu.map(([item, price], i) => (
               <div key={i} className="flex items-center justify-between text-[14px]">
                 <span>{item}</span>
@@ -1022,7 +1044,7 @@ function NeighborhoodMap({ items, active, onSelect }) {
     "bole-craft": [38, 72], "entoto-lookout": [15, 12],
   };
   return (
-    <div className="relative rounded-[28px] border border-line bg-cream2 overflow-hidden aspect-square">
+    <div className="relative rounded-[28px] apple-glass-card border border-white/60 overflow-hidden aspect-square shadow-sm">
       <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full opacity-[0.35]">
         <path d="M0 30 Q 30 20 50 35 T 100 25" stroke="#5C6B57" strokeWidth="0.6" fill="none" />
         <path d="M10 0 L 15 100" stroke="#1D1D1F" strokeWidth="0.3" fill="none" opacity="0.3" />
@@ -1032,7 +1054,7 @@ function NeighborhoodMap({ items, active, onSelect }) {
       </svg>
       <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
         <span className="w-3.5 h-3.5 rounded-full bg-espresso border-2 border-cream shadow" />
-        <span className="text-[10px] font-mono mt-1 bg-cream/90 px-1.5 py-0.5 rounded">Social House</span>
+        <span className="text-[10px] font-mono mt-1 apple-glass-light px-1.5 py-0.5 rounded shadow-sm">Social House</span>
       </div>
       {items.map(item => {
         const [x, y] = positions[item.id] || [50, 50];
@@ -1040,7 +1062,7 @@ function NeighborhoodMap({ items, active, onSelect }) {
         return (
           <button key={item.id} onClick={() => onSelect(item.id)}
             style={{ left: `${x}%`, top: `${y}%` }}
-            className={`tap absolute -translate-x-1/2 -translate-y-1/2 flex items-center justify-center rounded-full transition-all duration-300 ${isActive ? "w-8 h-8 bg-brass text-cream z-10 shadow-lg" : "w-6 h-6 bg-white text-espresso border border-line hover:border-brass/60"}`}
+            className={`tap absolute -translate-x-1/2 -translate-y-1/2 flex items-center justify-center rounded-full transition-all duration-300 ${isActive ? "w-8 h-8 bg-brass text-cream z-10 shadow-lg" : "w-6 h-6 apple-glass-light text-espresso border border-white/80 hover:border-brass/60"}`}
             aria-label={item.name}>
             <MapPinIcon size={isActive ? 14 : 11} />
           </button>
@@ -1064,7 +1086,7 @@ function ExperiencePage() {
       <Reveal delay={100} className="flex gap-2 mt-9 flex-wrap">
         {NEIGHBORHOOD_CATEGORIES.map(c => (
           <button key={c} onClick={() => setCat(c)}
-            className={`tap px-4 py-2 rounded-full text-[13px] font-medium border transition-colors duration-300 ${cat === c ? "bg-espresso text-cream border-espresso" : "border-line text-espresso2 hover:border-espresso/40"}`}>
+            className={`tap px-4 py-2 rounded-full text-[13px] font-medium border transition-all duration-300 ${cat === c ? "bg-espresso text-cream border-espresso shadow-sm" : "apple-glass-light border-white/60 text-espresso2 hover:border-espresso/40"}`}>
             {c}
           </button>
         ))}
@@ -1080,9 +1102,9 @@ function ExperiencePage() {
             return (
               <Reveal key={n.id} delay={i * 70}>
                 <button onClick={() => setActive(n.id)}
-                  className={`text-left w-full rounded-2xl border p-5 h-full transition-all duration-300 ${isActive ? "border-brass/60 bg-white shadow-[0_15px_40px_-20px_rgba(29,29,31,0.25)]" : "border-line bg-cream2/50 hover:border-espresso/25"}`}>
+                  className={`text-left w-full rounded-2xl p-5 h-full transition-all duration-300 ${isActive ? "border border-brass/60 bg-white/80 shadow-[0_15px_40px_-20px_rgba(29,29,31,0.25)]" : "apple-glass-card hover:border-espresso/25"}`}>
                   <div className="flex items-start justify-between gap-2">
-                    <div className="w-9 h-9 rounded-full bg-cream flex items-center justify-center border border-line shrink-0"><Icon size={16} /></div>
+                    <div className="w-9 h-9 rounded-full apple-glass-light flex items-center justify-center border border-white/80 shrink-0 shadow-sm"><Icon size={16} /></div>
                     <span className="text-[11.5px] font-mono text-espresso2 shrink-0">{n.walk}</span>
                   </div>
                   <h3 className="text-[16px] font-semibold tracking-tight mt-3">{n.name}</h3>
@@ -1112,21 +1134,21 @@ function ContactPage() {
         <Reveal delay={80}>
           {!sent ? (
             <form onSubmit={(e) => { e.preventDefault(); setSent(true); }} className="space-y-4 max-w-md">
-              <input required placeholder="Full name" className="w-full px-4 py-3.5 rounded-xl border border-line bg-white/70 text-[14.5px] focus:outline-none focus:border-espresso/40" />
-              <input required type="email" placeholder="Email address" className="w-full px-4 py-3.5 rounded-xl border border-line bg-white/70 text-[14.5px] focus:outline-none focus:border-espresso/40" />
-              <textarea required placeholder="Message" rows="5" className="w-full px-4 py-3.5 rounded-xl border border-line bg-white/70 text-[14.5px] focus:outline-none focus:border-espresso/40 resize-none" />
+              <input required placeholder="Full name" className="w-full px-4 py-3.5 rounded-xl border border-white/60 apple-glass-light text-[14.5px] focus:outline-none focus:border-espresso/40 shadow-inner" />
+              <input required type="email" placeholder="Email address" className="w-full px-4 py-3.5 rounded-xl border border-white/60 apple-glass-light text-[14.5px] focus:outline-none focus:border-espresso/40 shadow-inner" />
+              <textarea required placeholder="Message" rows="5" className="w-full px-4 py-3.5 rounded-xl border border-white/60 apple-glass-light text-[14.5px] focus:outline-none focus:border-espresso/40 resize-none shadow-inner" />
               <PrimaryButton className="w-full">Send Message</PrimaryButton>
             </form>
           ) : (
-            <div className="max-w-md rounded-2xl border border-line bg-cream2 p-8">
-              <div className="w-12 h-12 rounded-full bg-sage/15 text-sage flex items-center justify-center mb-4"><CheckIcon size={20} /></div>
+            <div className="max-w-md rounded-2xl border border-white/60 apple-glass-light p-8 shadow-sm">
+              <div className="w-12 h-12 rounded-full bg-sage/15 text-sage flex items-center justify-center mb-4 shadow-sm"><CheckIcon size={20} /></div>
               <h3 className="text-[19px] font-semibold">Message sent.</h3>
               <p className="text-[14px] text-espresso2 mt-2">Someone from the front desk will reply within a day.</p>
             </div>
           )}
         </Reveal>
         <Reveal delay={140}>
-          <Photo src={LOBBY_IMAGE} alt="Social House front desk" className="aspect-[4/3] mb-6" />
+          <Photo src={LOBBY_IMAGE} alt="Social House front desk" className="aspect-[4/3] mb-6 shadow-md" />
           <ul className="space-y-3 text-[14.5px] text-espresso2">
             <li className="flex items-center gap-3"><MapPinIcon size={16} /> Cameroon Street, Bole, Addis Ababa</li>
             <li className="flex items-center gap-3"><PhoneIcon size={16} /> +251 911 234 567</li>
@@ -1148,7 +1170,7 @@ function BookingStepper({ step }) {
       {BOOKING_STEPS.map((s, i) => (
         <React.Fragment key={s}>
           <div className="flex items-center gap-2 shrink-0">
-            <span className={`w-7 h-7 rounded-full flex items-center justify-center text-[12px] font-mono shrink-0 transition-colors duration-300 ${i < step ? "bg-sage text-cream" : i === step ? "bg-espresso text-cream" : "bg-cream2 text-espresso2 border border-line"}`}>
+            <span className={`w-7 h-7 rounded-full flex items-center justify-center text-[12px] font-mono shrink-0 transition-colors duration-300 ${i < step ? "bg-sage text-cream" : i === step ? "bg-espresso text-cream" : "apple-glass-light text-espresso2 border border-white/60"}`}>
               {i < step ? <CheckIcon size={12} /> : i + 1}
             </span>
             <span className={`text-[13px] font-medium hidden sm:inline ${i === step ? "text-espresso" : "text-espresso2"}`}>{s}</span>
@@ -1190,11 +1212,11 @@ function BookingPage({ booking, setBooking, initialStep }) {
     return (
       <section className="max-w-[720px] mx-auto px-5 sm:px-8 pt-16 sm:pt-24 pb-28 text-center">
         <Reveal>
-          <div className="w-16 h-16 rounded-full bg-sage/15 text-sage flex items-center justify-center mx-auto mb-6"><CheckIcon size={26} /></div>
+          <div className="w-16 h-16 rounded-full bg-sage/15 text-sage flex items-center justify-center mx-auto mb-6 shadow-sm"><CheckIcon size={26} /></div>
           <h1 className="text-[30px] sm:text-[38px] font-semibold tracking-tight">You're booked in.</h1>
           <p className="text-[15px] text-espresso2 mt-3">Confirmation sent to {guestInfo.email || "your inbox"}. We'll see you at the door.</p>
         </Reveal>
-        <Reveal delay={100} className="mt-10 rounded-[28px] border border-line bg-cream2 p-7 sm:p-9 text-left">
+        <Reveal delay={100} className="mt-10 rounded-[28px] apple-glass-card p-7 sm:p-9 text-left shadow-sm">
           <div className="flex items-center justify-between pb-5 border-b border-line">
             <span className="font-mono text-[13px] text-espresso2">BOOKING REFERENCE</span>
             <span className="font-mono text-[15px] font-semibold">{ref}</span>
@@ -1227,7 +1249,7 @@ function BookingPage({ booking, setBooking, initialStep }) {
       <Reveal delay={60} className="mt-8"><BookingStepper step={step} /></Reveal>
 
       <div className="grid lg:grid-cols-[1fr_320px] gap-10 mt-9">
-        <Reveal delay={100} key={step} className="reveal in rounded-[28px] border border-line bg-cream2/50 p-6 sm:p-8">
+        <Reveal delay={100} key={step} className="reveal in rounded-[28px] apple-glass-card p-6 sm:p-8 border border-white/60 shadow-sm">
           {step === 0 && (
             <div>
               <h2 className="text-[20px] font-semibold tracking-tight mb-6">When are you staying?</h2>
@@ -1235,15 +1257,15 @@ function BookingPage({ booking, setBooking, initialStep }) {
                 <label className="block">
                   <span className="text-[11.5px] font-mono text-espresso2">CHECK-IN</span>
                   <input type="date" value={booking.checkIn} onChange={(e) => setBooking(b => ({ ...b, checkIn: e.target.value }))}
-                    className="mt-1.5 w-full px-4 py-3 rounded-xl border border-line bg-white text-[14.5px] focus:outline-none focus:border-espresso/40" />
+                    className="mt-1.5 w-full px-4 py-3 rounded-xl border border-white/60 apple-glass-light text-[14.5px] focus:outline-none focus:border-espresso/40 shadow-inner" />
                 </label>
                 <label className="block">
                   <span className="text-[11.5px] font-mono text-espresso2">CHECK-OUT</span>
                   <input type="date" value={booking.checkOut} min={booking.checkIn} onChange={(e) => setBooking(b => ({ ...b, checkOut: e.target.value }))}
-                    className="mt-1.5 w-full px-4 py-3 rounded-xl border border-line bg-white text-[14.5px] focus:outline-none focus:border-espresso/40" />
+                    className="mt-1.5 w-full px-4 py-3 rounded-xl border border-white/60 apple-glass-light text-[14.5px] focus:outline-none focus:border-espresso/40 shadow-inner" />
                 </label>
               </div>
-              <div className="flex items-center justify-between mt-6 p-4 rounded-xl bg-white border border-line">
+              <div className="flex items-center justify-between mt-6 p-4 rounded-xl apple-glass-light border border-white/60 shadow-xs">
                 <span className="text-[14px] font-medium">Guests</span>
                 <Stepper value={booking.guests} onChange={(v) => setBooking(b => ({ ...b, guests: v }))} min={1} max={8} label="guests" />
               </div>
@@ -1257,7 +1279,7 @@ function BookingPage({ booking, setBooking, initialStep }) {
               <div className="space-y-3">
                 {ROOMS.map(r => (
                   <button key={r.id} onClick={() => setBooking(b => ({ ...b, selectedRoomId: r.id }))}
-                    className={`w-full text-left flex items-center gap-4 p-4 rounded-2xl border transition-all duration-300 ${booking.selectedRoomId === r.id ? "border-brass bg-white shadow-sm" : "border-line bg-white/50 hover:border-espresso/25"}`}>
+                    className={`w-full text-left flex items-center gap-4 p-4 rounded-2xl border transition-all duration-300 ${booking.selectedRoomId === r.id ? "border-brass bg-white/80 shadow-md" : "apple-glass-light border-white/60 hover:border-espresso/25"}`}>
                     <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0"><Photo src={r.image} alt={r.name} rounded="rounded-xl" className="w-full h-full" /></div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-2">
@@ -1284,7 +1306,7 @@ function BookingPage({ booking, setBooking, initialStep }) {
                   const checked = booking.addons.includes(a.id);
                   return (
                     <button key={a.id} onClick={() => toggleAddon(a.id)}
-                      className={`w-full text-left flex items-center gap-4 p-4 rounded-2xl border transition-all duration-300 ${checked ? "border-brass bg-white shadow-sm" : "border-line bg-white/50 hover:border-espresso/25"}`}>
+                      className={`w-full text-left flex items-center gap-4 p-4 rounded-2xl border transition-all duration-300 ${checked ? "border-brass bg-white/80 shadow-md" : "apple-glass-light border-white/60 hover:border-espresso/25"}`}>
                       <span className={`w-5 h-5 rounded-md border shrink-0 flex items-center justify-center ${checked ? "bg-brass border-brass" : "border-espresso/20"}`}>
                         {checked && <CheckIcon size={11} className="text-cream" strokeWidth={3} />}
                       </span>
@@ -1307,22 +1329,22 @@ function BookingPage({ booking, setBooking, initialStep }) {
                 <label className="block">
                   <span className="text-[11.5px] font-mono text-espresso2">FULL NAME</span>
                   <input required value={guestInfo.name} onChange={(e) => setGuestInfo(g => ({ ...g, name: e.target.value }))}
-                    className="mt-1.5 w-full px-4 py-3 rounded-xl border border-line bg-white text-[14.5px] focus:outline-none focus:border-espresso/40" />
+                    className="mt-1.5 w-full px-4 py-3 rounded-xl border border-white/60 apple-glass-light text-[14.5px] focus:outline-none focus:border-espresso/40 shadow-inner" />
                 </label>
                 <label className="block">
                   <span className="text-[11.5px] font-mono text-espresso2">EMAIL</span>
                   <input required type="email" value={guestInfo.email} onChange={(e) => setGuestInfo(g => ({ ...g, email: e.target.value }))}
-                    className="mt-1.5 w-full px-4 py-3 rounded-xl border border-line bg-white text-[14.5px] focus:outline-none focus:border-espresso/40" />
+                    className="mt-1.5 w-full px-4 py-3 rounded-xl border border-white/60 apple-glass-light text-[14.5px] focus:outline-none focus:border-espresso/40 shadow-inner" />
                 </label>
                 <label className="block">
                   <span className="text-[11.5px] font-mono text-espresso2">PHONE</span>
                   <input type="tel" value={guestInfo.phone} onChange={(e) => setGuestInfo(g => ({ ...g, phone: e.target.value }))}
-                    className="mt-1.5 w-full px-4 py-3 rounded-xl border border-line bg-white text-[14.5px] focus:outline-none focus:border-espresso/40" />
+                    className="mt-1.5 w-full px-4 py-3 rounded-xl border border-white/60 apple-glass-light text-[14.5px] focus:outline-none focus:border-espresso/40 shadow-inner" />
                 </label>
                 <label className="block sm:col-span-2">
                   <span className="text-[11.5px] font-mono text-espresso2">SPECIAL REQUESTS</span>
                   <textarea rows="3" value={guestInfo.requests} onChange={(e) => setGuestInfo(g => ({ ...g, requests: e.target.value }))}
-                    className="mt-1.5 w-full px-4 py-3 rounded-xl border border-line bg-white text-[14.5px] focus:outline-none focus:border-espresso/40 resize-none" />
+                    className="mt-1.5 w-full px-4 py-3 rounded-xl border border-white/60 apple-glass-light text-[14.5px] focus:outline-none focus:border-espresso/40 resize-none shadow-inner" />
                 </label>
               </div>
             </div>
@@ -1336,16 +1358,16 @@ function BookingPage({ booking, setBooking, initialStep }) {
                   <span className="text-[11.5px] font-mono text-espresso2">CARD NUMBER</span>
                   <div className="mt-1.5 relative">
                     <CreditCardIcon size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-espresso2" />
-                    <input placeholder="4242 4242 4242 4242" className="w-full pl-11 pr-4 py-3 rounded-xl border border-line bg-white text-[14.5px] focus:outline-none focus:border-espresso/40" />
+                    <input placeholder="4242 4242 4242 4242" className="w-full pl-11 pr-4 py-3 rounded-xl border border-white/60 apple-glass-light text-[14.5px] focus:outline-none focus:border-espresso/40 shadow-inner" />
                   </div>
                 </label>
                 <label className="block">
                   <span className="text-[11.5px] font-mono text-espresso2">EXPIRY</span>
-                  <input placeholder="MM / YY" className="mt-1.5 w-full px-4 py-3 rounded-xl border border-line bg-white text-[14.5px] focus:outline-none focus:border-espresso/40" />
+                  <input placeholder="MM / YY" className="mt-1.5 w-full px-4 py-3 rounded-xl border border-white/60 apple-glass-light text-[14.5px] focus:outline-none focus:border-espresso/40 shadow-inner" />
                 </label>
                 <label className="block">
                   <span className="text-[11.5px] font-mono text-espresso2">CVC</span>
-                  <input placeholder="123" className="mt-1.5 w-full px-4 py-3 rounded-xl border border-line bg-white text-[14.5px] focus:outline-none focus:border-espresso/40" />
+                  <input placeholder="123" className="mt-1.5 w-full px-4 py-3 rounded-xl border border-white/60 apple-glass-light text-[14.5px] focus:outline-none focus:border-espresso/40 shadow-inner" />
                 </label>
               </div>
               <div className="flex items-center gap-2 mt-5 text-[12.5px] text-espresso2">
@@ -1355,7 +1377,7 @@ function BookingPage({ booking, setBooking, initialStep }) {
           )}
         </Reveal>
 
-        <Reveal delay={140} className="rounded-[28px] border border-line bg-white p-6 h-fit lg:sticky lg:top-24">
+        <Reveal delay={140} className="rounded-[28px] apple-glass-light border border-white/80 p-6 h-fit lg:sticky lg:top-24 shadow-md">
           <h3 className="text-[13px] font-mono tracking-wide text-espresso2 mb-4">SUMMARY</h3>
           {room ? (
             <div className="flex items-center gap-3 pb-4 border-b border-line mb-4">
@@ -1383,7 +1405,7 @@ function BookingPage({ booking, setBooking, initialStep }) {
 
       <div className="flex items-center justify-between mt-8">
         <button onClick={() => setStep(s => Math.max(0, s - 1))} disabled={step === 0}
-          className="tap flex items-center gap-1.5 px-5 py-3 rounded-full text-[14px] font-medium disabled:opacity-0 hover:bg-cream2 transition-colors">
+          className="tap flex items-center gap-1.5 px-5 py-3 rounded-full text-[14px] font-medium disabled:opacity-0 hover:bg-white/60 transition-colors">
           <ChevronLeft size={16} /> Back
         </button>
         <PrimaryButton
